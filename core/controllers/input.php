@@ -227,7 +227,13 @@ class acf_input
 					$typenow, 
 					$acf['options']['position'], 
 					$priority, 
-					array( 'fields' => $acf['fields'], 'options' => $acf['options'], 'show' => $show, 'post_id' => $post->ID )
+					array(
+                        'fields'            => $acf['fields'],
+                        'options'           => $acf['options'],
+                        'show'              => $show,
+                        'post_id'           => $post->ID,
+                        'field_group_name'  => $acf['name'],        // **** wdh: added
+                    )
 				);
 				
 			}
@@ -375,7 +381,13 @@ class acf_input
 			
 			if( $options['show'] )
 			{
-				$this->parent->render_fields_for_input( $options['fields'], $options['post_id'] );
+                // ***********************************
+                // wdh : additionally pass values
+//              $this->parent->render_fields_for_input( $options['fields'], $options['post_id'] );
+
+                $this->parent->render_fields_for_input( $options['fields'], $options['post_id'], $options['field_group_name'] );
+
+                // ***********************************
 			}
 			else
 			{

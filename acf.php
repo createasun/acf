@@ -12,7 +12,7 @@ Copyright: Elliot Condon
 
 include('core/api.php');
 
-$acf = new Acf();
+//$acf = new Acf(); // **** wdh :  removed for theme use
 
 class Acf
 { 
@@ -43,13 +43,13 @@ class Acf
 	*  @since 1.0.0
 	*  @created: 23/06/12
 	*/
-	
-	function __construct()
-	{
 
-		// vars
-		$this->path = plugin_dir_path(__FILE__);
-		$this->dir = plugins_url('',__FILE__);
+    function __construct($acf_dir,$theme_prefix)
+    {
+
+        // vars
+        $this->path = plugin_dir_path(__FILE__);
+        $this->dir = $acf_dir;//plugins_url('',__FILE__); // **** wdh : removed for theme use
 		$this->version = '3.5.6.3';
 		$this->upgrade_version = '3.4.1'; // this is the latest version which requires an upgrade
 		$this->cache = array(); // basic array cache to hold data throughout the page load
@@ -66,7 +66,11 @@ class Acf
 				'gallery'			=> '', // activation code for the gallery add-on (XXXX-XXXX-XXXX-XXXX)
 			),
 		);
-		
+
+        // ********************************
+        //  wdh
+        $this->theme_prefix = $theme_prefix;
+        // ********************************
 		
 		// set text domain
 		load_plugin_textdomain('acf', false, basename(dirname(__FILE__)).'/lang' );
@@ -623,6 +627,9 @@ class Acf
 			
 				// set cache
 				$this->set_cache('acf_field_' . $field_key, $field);
+
+//                phplog('acf.php','$field_key=',$field_key );
+//                phplog('acf.php','$field=',$field );
 				
 				return $field;
 			}

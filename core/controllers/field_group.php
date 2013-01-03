@@ -605,8 +605,8 @@ class acf_field_group
 	*/
 	
 	function save_post($post_id)
-	{	
-		
+	{
+
 		// only for save acf
 		if( ! isset($_POST['acf_field_group']) || ! wp_verify_nonce($_POST['acf_field_group'], 'acf_field_group') )
 		{

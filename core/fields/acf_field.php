@@ -113,6 +113,8 @@ class acf_Field
 	{
 		// strip slashes
 		$value = stripslashes_deep($value);
+
+
 		
 		
 		// apply filters
@@ -131,7 +133,14 @@ class acf_Field
 		// if $post_id is a string, then it is used in the everything fields and can be found in the options table
 		if( is_numeric($post_id) )
 		{
-			update_post_meta($post_id, $field['name'], $value);
+            phplog('acf.php','$post_id=',$post_id );
+            phplog('acf.php','$field=',$field );
+            phplog('acf.php','$value=',$value );
+            phplog('acf.php','$field[name]=',$field['name'] );
+
+
+
+            update_post_meta($post_id, $field['name'], $value);
 			update_post_meta($post_id, '_' . $field['name'], $field['key']);
 		}
 		elseif( strpos($post_id, 'user_') !== false )
