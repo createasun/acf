@@ -228,11 +228,13 @@ class acf_input
 					$acf['options']['position'], 
 					$priority, 
 					array(
+                        'field_group_id'    => $acf['id'],          // **** wdh: added
+                        'field_group_name'  => $acf['name'],        // **** wdh: added
                         'fields'            => $acf['fields'],
                         'options'           => $acf['options'],
                         'show'              => $show,
                         'post_id'           => $post->ID,
-                        'field_group_name'  => $acf['name'],        // **** wdh: added
+
                     )
 				);
 				
@@ -377,16 +379,26 @@ class acf_input
 		if( $options['fields'] )
 		{
 			echo '<input type="hidden" name="save_input" value="true" />';
+
+            // ***********************************
+            // wdh : additional feature sent in $_POST via name/value pairs
+            // allow data from this metabox to be posted to a different post to its parent
+            $metabox_name = $args['id'];
+            echo '<input type="hidden" name="metabox_post_id['.$metabox_name.']" value="'.$options['post_id'].'"/>';
+            // wdh : save the field_group_name the metabox is using
+            echo '<input type="hidden" name="metabox_field_group_name['.$metabox_name.']" value="'.$options['field_group_name'].'"/>';
+            // ***********************************
+
 			echo '<div class="options" data-layout="' . $options['options']['layout'] . '" data-show="' . $options['show'] . '" style="display:none"></div>';
 			
 			if( $options['show'] )
 			{
                 // ***********************************
                 // wdh : additionally pass values
+                // wdh: removed
 //              $this->parent->render_fields_for_input( $options['fields'], $options['post_id'] );
-
-                $this->parent->render_fields_for_input( $options['fields'], $options['post_id'], $options['field_group_name'] );
-
+                // wdh: added
+                $this->parent->render_fields_for_input( $options['fields'], $options['post_id'], $metabox_name, $options['field_group_name'] );
                 // ***********************************
 			}
 			else

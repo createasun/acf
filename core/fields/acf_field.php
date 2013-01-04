@@ -133,10 +133,10 @@ class acf_Field
 		// if $post_id is a string, then it is used in the everything fields and can be found in the options table
 		if( is_numeric($post_id) )
 		{
-            phplog('acf.php','$post_id=',$post_id );
-            phplog('acf.php','$field=',$field );
-            phplog('acf.php','$value=',$value );
-            phplog('acf.php','$field[name]=',$field['name'] );
+//            phplog('acf_field.php','$post_id=',$post_id );
+//            phplog('acf_field.php','$field=',$field );
+//            phplog('acf_field.php','$value=',$value );
+//            phplog('acf_field.php','$field[name]=',$field['name'] );
 
 
 

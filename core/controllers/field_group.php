@@ -594,128 +594,212 @@ class acf_field_group
         
         return $name;
 	}
-	
-	
-	/*
-	*  save_post
-	*
-	*  @description: Saves the field / location / option data for a field group
-	*  @since 1.0.0
-	*  @created: 23/06/12
-	*/
-	
-	function save_post($post_id)
-	{
 
-		// only for save acf
-		if( ! isset($_POST['acf_field_group']) || ! wp_verify_nonce($_POST['acf_field_group'], 'acf_field_group') )
-		{
-			return $post_id;
-		}
-		
-		
-		// do not save if this is an auto save routine
-		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return $post_id;
-		
-		
-		// only save once! WordPress save's a revision as well.
-		if( wp_is_post_revision($post_id) )
-		{
-	    	return $post_id;
+
+    /*--------------------------------------------------------------------------------------
+    *  save_post
+    *
+    *  @description: Saves the field / location / option data for a field group
+    *  @author Elliot Condon / Wayne D Harris
+    *  @since 1.0.0
+    *  @created: 23/06/12
+    *-------------------------------------------------------------------------------------*/
+
+    function save_post($acf_post_id)
+    {
+
+        // only for save acf
+        if( ! isset($_POST['acf_field_group']) || ! wp_verify_nonce($_POST['acf_field_group'], 'acf_field_group') )
+        {
+            return $acf_post_id;
         }
-		
-		
-		/*
+
+
+        // do not save if this is an auto save routine
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return $acf_post_id;
+
+
+        // only save once! WordPress save's a revision as well.
+        if( wp_is_post_revision($acf_post_id) )
+        {
+            return $acf_post_id;
+        }
+
+        // todo separate into fns: save_acf_fields, save_acf_location, save_acf_options ???
+
+        /*--------------------------------------
 		*  save fields
-		*/
-		
+		*--------------------------------------*/
 
-		// vars
-		$dont_delete = array();
-		
-		
-		
-		if( $_POST['fields'] )
-		{
-			$i = -1;
-			
+        // vars
+        $dont_delete = array();
 
-			// remove clone field
-			unset( $_POST['fields']['field_clone'] );
-			
+        // **** wdh
+        $fields = array();
 
-			// loop through and save fields
-			foreach( $_POST['fields'] as $key => $field )
-			{
-				$i++;
-				
-				
-				// order + key
-				$field['order_no'] = $i;
-				$field['key'] = $key;
-				
-				
-				// trim key
-				$field['key'] = preg_replace('/\s+/' , '' , $field['key']);
-				
-				
-				// save
-				$this->parent->update_field( $post_id, $field);
-				
-				
-				// add to dont delete array
-				$dont_delete[] = $field['key'];
-			}
-		}
-		
-		
-		// delete all other field
-		$keys = get_post_custom_keys($post_id);
-		foreach( $keys as $key )
-		{
-			if( strpos($key, 'field_') !== false && !in_array($key, $dont_delete) )
-			{
-				// this is a field, and it wasn't found in the dont_delete array
-				delete_post_meta($post_id, $key);
-			}
-		}
-		
-		
-		/*
-		*  save location rules
-		*/
-		
-		$location = $_POST['location'];
-		update_post_meta($post_id, 'allorany', $location['allorany']);
-		
-		delete_post_meta($post_id, 'rule');
-		if($location['rules'])
-		{
-			foreach($location['rules'] as $k => $rule)
-			{
-				$rule['order_no'] = $k;
-				add_post_meta($post_id, 'rule', $rule);
-			}
-		}
-		
-		
-		/*
+        if( $_POST['fields'] )
+        {
+            $i = -1;
+
+
+            // remove clone field
+            unset( $_POST['fields']['field_clone'] );
+
+
+            // loop through and save fields
+            foreach( $_POST['fields'] as $key => $field )
+            {
+                $i++;
+
+
+                // order + key
+                $field['order_no'] = $i;
+                $field['key'] = $key;
+
+
+                // trim key
+                $field['key'] = preg_replace('/\s+/' , '' , $field['key']);
+
+
+                // ********************************
+                //wdh : dont save yet cache for now
+                $this->parent->update_field( $acf_post_id, $field); // **** wdh: removed
+                $fields[$field['key']] = $field;
+                // ********************************
+
+                // ********************************
+                //  wdh : redundant
+                // add to dont delete array
+                $dont_delete[] = $field['key'];
+                // ********************************
+            }
+        }
+
+        // ********************************
+        //  wdh : redundant
+        // delete all other field
+        $keys = get_post_custom_keys($acf_post_id);
+        foreach( $keys as $key )
+        {
+            if( strpos($key, 'field_') !== false && !in_array($key, $dont_delete) )
+            {
+                // this is a field, and it wasn't found in the dont_delete array
+                delete_post_meta($acf_post_id, $key);
+            }
+        }
+        // ********************************
+
+        /*--------------------------------------
+        *  save location rules
+        *--------------------------------------*/
+
+        $location_defaults = array(
+            'rules'		=>	array(),
+            'allorany'	=>	'all',
+        );
+
+        $location = $_POST['location'];
+
+        // ********************************
+        //wdh : dont save yet cache for now
+        $location_config = array();
+
+        update_post_meta($acf_post_id, 'allorany', $location['allorany']); // **** wdh: removed
+        $location_config['allorany'] = $location['allorany'];
+        // ********************************
+
+        delete_post_meta($acf_post_id, 'rule'); // **** wdh: removed
+
+
+        if($location['rules'])
+        {
+            foreach($location['rules'] as $k => $rule)
+            {
+                $rule['order_no'] = $k;
+
+                // ********************************
+                //wdh : dont save yet cache for now
+                add_post_meta($acf_post_id, 'rule', $rule); // **** wdh: removed
+                $location_config['rules'][$rule['order_no']] = $rule;
+                // ********************************
+            }
+        }
+        // ****************
+        //wdh: sort these into order now for easy reading later
+        ksort($location_config['rules']);
+        // ****************
+
+        $options = array_merge( $location_defaults, $location_config );
+
+        /*--------------------------------------
 		*  save options
-		*/
-		
-		$options = $_POST['options'];
-		
-		if(!isset($options['position'])) { $options['position'] = 'normal'; }
-		if(!isset($options['layout'])) { $options['layout'] = 'default'; }
-		if(!isset($options['hide_on_screen'])) { $options['hide_on_screen'] = array(); }
-		
-		update_post_meta($post_id, 'position', $options['position']);
-		update_post_meta($post_id, 'layout', $options['layout']);
-		update_post_meta($post_id, 'hide_on_screen', $options['hide_on_screen']);
-		
-	
-		
-	}
+		*--------------------------------------*/
+
+        $options_defaults = array(
+            'position'			=>	'normal',
+            'layout'			=>	'no_box',
+            'hide_on_screen'	=>	array(),
+        );
+
+
+//        phplog('field_group','$options[hide_on_screen]=',$options['hide_on_screen']);
+
+        $options = $_POST['options'];
+
+        if(!isset($options['position'])) { $options['position'] = 'normal'; }
+        if(!isset($options['layout'])) { $options['layout'] = 'default'; }
+        if(!isset($options['hide_on_screen'])) { $options['hide_on_screen'] = array(); }
+
+        // ********************************
+        //wdh: removed
+        update_post_meta($acf_post_id, 'position', $options['position']);
+        update_post_meta($acf_post_id, 'layout', $options['layout']);
+        update_post_meta($acf_post_id, 'hide_on_screen', $options['hide_on_screen']);
+        // ********************************
+
+        $options = array_merge( $options_defaults, $options );
+
+
+        /*--------------------------------------
+        *  build field group config array
+        *--------------------------------------*/
+
+        // ********************************
+        // wdh : all the field_group config is saved as one post_meta value rather than hitting the table with many values
+        // id, title and menu_order are added here to make for easier access later (rather than adding on the fly in acf.php->get_field_groups())
+        // this saving of one array also allows a cascading of global default options (saved in one array entry in the options table) with page-specfic options
+
+        $field_group_config                 = array();
+        $field_group_config['id']           = $acf_post_id;
+        $field_group_config['name']         = $_POST['post_name'];  // wdh : new field added to $acf object
+        $field_group_config['title']        = $_POST['post_title'];
+        $field_group_config['fields']       = $fields;
+        $field_group_config['location']     = $location_config;
+        $field_group_config['options']      = $options;
+        $field_group_config['menu_order']   = $_POST['menu_order'];
+
+        // todo - make the post_meta UNIQUE ????
+
+        add_post_meta( $acf_post_id, '_field_group', $field_group_config );
+
+        // ********************************
+
+//        $check = get_post_meta( $acf_post_id, '_field_group', true );
+
+//        phplog('field_group','$acf_post_id=',$acf_post_id);
+//        phplog('field_group','$_POST=',$_POST);
+//        phplog('field_group','$_POST[post_title]=',$_POST['post_title']);
+//        phplog('field_group','$_POST[menu_order]=',$_POST['menu_order']);
+//        phplog('field_group','$fields=',$fields);
+//        phplog('field_group','$fields["field_38"]=',$fields["field_38"]);
+//        phplog('field_group','$fields["field_29"]=',$fields["field_29"]);
+//
+//       phplog('field_group','$field_group_config=',$field_group_config);
+//
+//        phplog('field_group','$options=',$options);
+//        phplog('field_group','$check=',$check);
+
+    }
 		
 	
 	/*

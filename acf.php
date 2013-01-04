@@ -44,7 +44,7 @@ class Acf
 	*  @created: 23/06/12
 	*/
 
-    function __construct($acf_dir,$theme_prefix)
+    function __construct( $acf_dir, $theme_prefix='acf-' )
     {
 
         // vars
