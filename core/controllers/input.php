@@ -221,19 +221,19 @@ class acf_input
 				
 				// add meta box
 				add_meta_box(
-					'acf_' . $acf['id'], 
-					$acf['title'], 
+					'acf_' . $acf['id'],                            //metabox unique id : will be used in html #id and as the key to field group post_meta
+					$acf['title'],                                  //metabox title
 					array($this, 'meta_box_input'), 
 					$typenow, 
 					$acf['options']['position'], 
 					$priority, 
 					array(
-                        'field_group_id'    => $acf['id'],          // **** wdh: added
-                        'field_group_name'  => $acf['name'],        // **** wdh: added
-                        'fields'            => $acf['fields'],
-                        'options'           => $acf['options'],
-                        'show'              => $show,
-                        'post_id'           => $post->ID,
+                        'field_group_post_id'   => $acf['id'],      // **** wdh: added
+                        'field_group_post_name' => $acf['name'],    // **** wdh: added
+                        'fields'                => $acf['fields'],
+                        'options'               => $acf['options'],
+                        'show'                  => $show,
+                        'post_id'               => $post->ID,
 
                     )
 				);
@@ -243,103 +243,78 @@ class acf_input
 		}
 		// if($acfs)
 	}
-	
-	
-	/*
-	*  get_input_style
-	*
-	*  @description: called by admin_head to generate acf css style (hide other metaboxes)
-	*  @since 2.0.5
-	*  @created: 23/06/12
-	*/
 
-	function get_input_style($acf_id = false)
+    /*--------------------------------------------------------------------------------------
+    *  get_input_style
+    *
+    *  @description: called by admin_head to generate acf css style (hide other metaboxes)
+    *  @since 2.0.5
+    *  @rewrite: 05/01/13
+    *  @author: Wayne D Harris / Elliot Condon
+    *-------------------------------------------------------------------------------------*/
+    function get_input_style( $acf_id = false )
 	{
-		// vars
-		$acfs = $this->parent->get_field_groups();
-		$html = "";
-		
-		// find acf
+        // vars
+        $acfs = $this->parent->get_field_groups();
+        $html = "";
+
+        // find acf
 		if($acfs)
 		{
 			foreach($acfs as $acf)
 			{
-				if($acf['id'] != $acf_id) continue;
-				
+                if($acf['id'] != $acf_id) continue;
 
-				// add style to html 
-				if( in_array('the_content',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#postdivrich {display: none;} ';
-				}
-				if( in_array('excerpt',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#postexcerpt, #screen-meta label[for=postexcerpt-hide] {display: none;} ';
-				}
-				if( in_array('custom_fields',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#postcustom, #screen-meta label[for=postcustom-hide] { display: none; } ';
-				}
-				if( in_array('discussion',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#commentstatusdiv, #screen-meta label[for=commentstatusdiv-hide] {display: none;} ';
-				}
-				if( in_array('comments',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#commentsdiv, #screen-meta label[for=commentsdiv-hide] {display: none;} ';
-				}
-				if( in_array('slug',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#slugdiv, #screen-meta label[for=slugdiv-hide] {display: none;} ';
-				}
-				if( in_array('author',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#authordiv, #screen-meta label[for=authordiv-hide] {display: none;} ';
-				}
-				if( in_array('format',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#formatdiv, #screen-meta label[for=formatdiv-hide] {display: none;} ';
-				}
-				if( in_array('featured_image',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#postimagediv, #screen-meta label[for=postimagediv-hide] {display: none;} ';
-				}
-				if( in_array('revisions',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#revisionsdiv, #screen-meta label[for=revisionsdiv-hide] {display: none;} ';
-				}
-				if( in_array('categories',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#categorydiv, #screen-meta label[for=categorydiv-hide] {display: none;} ';
-				}
-				if( in_array('tags',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#tagsdiv-post_tag, #screen-meta label[for=tagsdiv-post_tag-hide] {display: none;} ';
-				}
-				if( in_array('send-trackbacks',$acf['options']['hide_on_screen']) )
-				{
-					$html .= '#trackbacksdiv, #screen-meta label[for=trackbacksdiv-hide] {display: none;} ';
-				}
-				
-				
-				break;
+                $options_hide_array = $acf['options']['hide_on_screen'];
 
-			}
-			// foreach($acfs as $acf)
-		}
-		//if($acfs)
-		
-		return $html;
-	}
-	
-	
-	/*
-	*  the_input_style
-	*
-	*  @description: called by input-actions.js to hide / show other metaboxes
-	*  @since 2.0.5
-	*  @created: 23/06/12
-	*/
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'the_content',      'postdivrich'       );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'excerpt',          'postexcerpt'       );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'custom_fields',    'postcustom'        );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'discussion',       'commentstatusdiv'  );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'comments',         'commentsdiv'       );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'slug',             'slugdiv'           );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'author',           'authordiv'         );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'format',           'formatdiv'         );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'featured_image',   'postimagediv'      );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'revisions',        'revisionsdiv'      );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'categories',       'categorydiv'       );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'tags',             'tagsdiv-post_tag'  );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'send-trackbacks',  'trackbacksdiv'     );
+            }
+        }
+        return $html;
+    }
+    /*--------------------------------------------------------------------------------------
+    *  maybe_hide_metabox_style
+    *
+    *  @description: hide metabox style
+    *  @since 2.0.5
+    *  @rewrite: 05/01/13
+    *  @author: Wayne D Harris / Elliot Condon
+    *-------------------------------------------------------------------------------------*/
+    function maybe_hide_metabox_style( $options_hide_array, $style_key, $style_name )
+	{
+        if( in_array( $style_key, $options_hide_array ) )
+        {
+            if($style_key=='the_content')
+            {
+                return '#'.$style_name.' {display: none;} ';
+            }
+            else
+            {
+                return '#'.$style_name.', #screen-meta label[for='.$style_name.'-hide] {display: none;} ';
+            }
+        }
+    }
+
+
+    /*--------------------------------------------------------------------------------------
+    *  the_input_style
+    *
+    *  @description: called by input-actions.js to hide / show other metaboxes
+    *  @since 2.0.5
+    *  @created: 23/06/12
+    *-------------------------------------------------------------------------------------*/
 	
 	function ajax_get_input_style()
 	{
@@ -351,17 +326,17 @@ class acf_input
 		
 		die;
 	}
+
+
+    /*--------------------------------------------------------------------------------------
+    *  meta_box_input
+    *
+    *  @description:
+    *  @since 1.0.0
+    *  @created: 23/06/12
+    *-------------------------------------------------------------------------------------*/
 	
-	
-	/*
-	*  meta_box_input
-	*
-	*  @description: 
-	*  @since 1.0.0
-	*  @created: 23/06/12
-	*/
-	
-	function meta_box_input($post, $args)
+	function meta_box_input($post, $metabox)
 	{
 		// vars
 		$options = array(
@@ -372,7 +347,7 @@ class acf_input
 			'show' => 0,
 			'post_id' => 0,
 		);
-		$options = array_merge( $options, $args['args'] );
+		$options = array_merge( $options, $metabox['args'] );
 		
 		
 		// needs fields
@@ -382,11 +357,16 @@ class acf_input
 
             // ***********************************
             // wdh : additional feature sent in $_POST via name/value pairs
-            // allow data from this metabox to be posted to a different post to its parent
-            $metabox_name = $args['id'];
-            echo '<input type="hidden" name="metabox_post_id['.$metabox_name.']" value="'.$options['post_id'].'"/>';
-            // wdh : save the field_group_name the metabox is using
-            echo '<input type="hidden" name="metabox_field_group_name['.$metabox_name.']" value="'.$options['field_group_name'].'"/>';
+            // allow data from this metabox to be posted to a different post than its parent
+
+            // use the metabox id as the field_group_values_key
+            $field_group_values_key     = $metabox['id'];
+            echo '<input type="hidden" name="field_group_values_target_post_id['.$field_group_values_key.']" value="'.$options['post_id'].'"/>';
+
+            // save the field_group_post_name/id the metabox is using
+            echo '<input type="hidden" name="field_group_post_id['.$field_group_values_key.']" value="'.$options['field_group_post_id'].'"/>';
+            echo '<input type="hidden" name="field_group_post_name['.$field_group_values_key.']" value="'.$options['field_group_post_name'].'"/>';
+
             // ***********************************
 
 			echo '<div class="options" data-layout="' . $options['options']['layout'] . '" data-show="' . $options['show'] . '" style="display:none"></div>';
@@ -395,10 +375,13 @@ class acf_input
 			{
                 // ***********************************
                 // wdh : additionally pass values
+
                 // wdh: removed
 //              $this->parent->render_fields_for_input( $options['fields'], $options['post_id'] );
+
                 // wdh: added
-                $this->parent->render_fields_for_input( $options['fields'], $options['post_id'], $metabox_name, $options['field_group_name'] );
+                $this->parent->render_fields_for_input( $options['fields'], $options['post_id'], $field_group_values_key, $options['field_group_post_id'] );
+
                 // ***********************************
 			}
 			else
@@ -408,15 +391,15 @@ class acf_input
 			
 		}
 	}
-	
-	
-	/*
-	*  ajax_acf_input
-	*
-	*  @description: 
-	*  @since 3.1.6
-	*  @created: 23/06/12
-	*/
+
+
+    /*--------------------------------------------------------------------------------------
+    *  ajax_acf_input
+    *
+    *  @description:
+    *  @since 3.1.6
+    *  @created: 23/06/12
+    *-------------------------------------------------------------------------------------*/
 
 	function ajax_acf_input()
 	{
@@ -455,15 +438,15 @@ class acf_input
 		die();
 		
 	}
-	
-	
-	/*
-	*  save_post
-	*
-	*  @description: Saves the field / location / option data for a field group
-	*  @since 1.0.0
-	*  @created: 23/06/12
-	*/
+
+
+    /*--------------------------------------------------------------------------------------
+    *  save_post
+    *
+    *  @description: Saves the field / location / option data for a field group
+    *  @since 1.0.0
+    *  @created: 23/06/12
+    *-------------------------------------------------------------------------------------*/
 	
 	function save_post($post_id)
 	{	
@@ -491,15 +474,15 @@ class acf_input
         }
         
 	}
-	
-	
-	/*
-	*  save_post_revision
-	*
-	*  @description: simple copy and paste of fields
-	*  @since 3.4.4
-	*  @created: 4/09/12
-	*/
+
+
+    /*--------------------------------------------------------------------------------------
+    *  save_post_revision
+    *
+    *  @description: simple copy and paste of fields
+    *  @since 3.4.4
+    *  @created: 4/09/12
+    *-------------------------------------------------------------------------------------*/
 	
 	function save_post_revision( $parent_id, $revision_id )
 	{
@@ -846,7 +829,92 @@ html.wp-toolbar {
 	
 	}
 
-	
+    /*
+    *  get_input_style
+    *
+    *  @description: called by admin_head to generate acf css style (hide other metaboxes)
+    *  @since 2.0.5
+    *  @created: 23/06/12
+    */
+
+//    function get_input_style($acf_id = false)
+//    {
+//        // vars
+//        $acfs = $this->parent->get_field_groups();
+//        $html = "";
+//
+//        // find acf
+//        if($acfs)
+//        {
+//            foreach($acfs as $acf)
+//            {
+//                if($acf['id'] != $acf_id) continue;
+//
+//
+//                // add style to html
+//                if( in_array('the_content',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#postdivrich {display: none;} ';
+//                }
+//                if( in_array('excerpt',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#postexcerpt, #screen-meta label[for=postexcerpt-hide] {display: none;} ';
+//                }
+//                if( in_array('custom_fields',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#postcustom, #screen-meta label[for=postcustom-hide] { display: none; } ';
+//                }
+//                if( in_array('discussion',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#commentstatusdiv, #screen-meta label[for=commentstatusdiv-hide] {display: none;} ';
+//                }
+//                if( in_array('comments',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#commentsdiv, #screen-meta label[for=commentsdiv-hide] {display: none;} ';
+//                }
+//                if( in_array('slug',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#slugdiv, #screen-meta label[for=slugdiv-hide] {display: none;} ';
+//                }
+//                if( in_array('author',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#authordiv, #screen-meta label[for=authordiv-hide] {display: none;} ';
+//                }
+//                if( in_array('format',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#formatdiv, #screen-meta label[for=formatdiv-hide] {display: none;} ';
+//                }
+//                if( in_array('featured_image',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#postimagediv, #screen-meta label[for=postimagediv-hide] {display: none;} ';
+//                }
+//                if( in_array('revisions',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#revisionsdiv, #screen-meta label[for=revisionsdiv-hide] {display: none;} ';
+//                }
+//                if( in_array('categories',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#categorydiv, #screen-meta label[for=categorydiv-hide] {display: none;} ';
+//                }
+//                if( in_array('tags',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#tagsdiv-post_tag, #screen-meta label[for=tagsdiv-post_tag-hide] {display: none;} ';
+//                }
+//                if( in_array('send-trackbacks',$acf['options']['hide_on_screen']) )
+//                {
+//                    $html .= '#trackbacksdiv, #screen-meta label[for=trackbacksdiv-hide] {display: none;} ';
+//                }
+//
+//
+//                break;
+//
+//            }
+//            // foreach($acfs as $acf)
+//        }
+//        //if($acfs)
+//
+//        return $html;
+//    }
 
 	
 }

@@ -662,15 +662,17 @@ class acf_field_group
 
 
                 // ********************************
-                //wdh : dont save yet cache for now
-                $this->parent->update_field( $acf_post_id, $field); // **** wdh: removed
+                // wdh : dont save yet cache for now
+                // wdh : removed
+//                $this->parent->update_field( $acf_post_id, $field);
+                // wdh : added
                 $fields[$field['key']] = $field;
                 // ********************************
 
                 // ********************************
                 //  wdh : redundant
                 // add to dont delete array
-                $dont_delete[] = $field['key'];
+//                $dont_delete[] = $field['key'];
                 // ********************************
             }
         }
