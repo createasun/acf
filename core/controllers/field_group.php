@@ -625,16 +625,17 @@ class acf_field_group
             return $acf_post_id;
         }
 
-        // todo separate into fns: save_acf_fields, save_acf_location, save_acf_options ???
+        // todo separate into fns: save_acf_fields, save_acf_location, save_acf_options ??
 
         /*--------------------------------------
 		*  save fields
 		*--------------------------------------*/
 
+        // wdh : removed
         // vars
-        $dont_delete = array();
+//        $dont_delete = array();
 
-        // **** wdh
+        // wdh : added
         $fields = array();
 
         if( $_POST['fields'] )
@@ -662,11 +663,14 @@ class acf_field_group
 
 
                 // ********************************
-                // wdh : dont save yet cache for now
+                // wdh : dont save yet - cache for now
                 // wdh : removed
-//                $this->parent->update_field( $acf_post_id, $field);
+//              $this->parent->update_field( $acf_post_id, $field);
                 // wdh : added
+                $field = $this->parent->apply_save_field_filters( $field );
+
                 $fields[$field['key']] = $field;
+
                 // ********************************
 
                 // ********************************
@@ -680,15 +684,15 @@ class acf_field_group
         // ********************************
         //  wdh : redundant
         // delete all other field
-        $keys = get_post_custom_keys($acf_post_id);
-        foreach( $keys as $key )
-        {
-            if( strpos($key, 'field_') !== false && !in_array($key, $dont_delete) )
-            {
-                // this is a field, and it wasn't found in the dont_delete array
-                delete_post_meta($acf_post_id, $key);
-            }
-        }
+//        $keys = get_post_custom_keys($acf_post_id);
+//        foreach( $keys as $key )
+//        {
+//            if( strpos($key, 'field_') !== false && !in_array($key, $dont_delete) )
+//            {
+//                // this is a field, and it wasn't found in the dont_delete array
+//                delete_post_meta($acf_post_id, $key);
+//            }
+//        }
         // ********************************
 
         /*--------------------------------------
@@ -705,13 +709,14 @@ class acf_field_group
         // ********************************
         //wdh : dont save yet cache for now
         $location_config = array();
-
-        update_post_meta($acf_post_id, 'allorany', $location['allorany']); // **** wdh: removed
+        // wdh: removed
+//        update_post_meta($acf_post_id, 'allorany', $location['allorany']);
+        // wdh: added
         $location_config['allorany'] = $location['allorany'];
+
+        // wdh: removed
+//        delete_post_meta($acf_post_id, 'rule');
         // ********************************
-
-        delete_post_meta($acf_post_id, 'rule'); // **** wdh: removed
-
 
         if($location['rules'])
         {
@@ -721,17 +726,19 @@ class acf_field_group
 
                 // ********************************
                 //wdh : dont save yet cache for now
-                add_post_meta($acf_post_id, 'rule', $rule); // **** wdh: removed
+                // wdh: removed
+//                add_post_meta($acf_post_id, 'rule', $rule);
+                // wdh: added
                 $location_config['rules'][$rule['order_no']] = $rule;
                 // ********************************
             }
         }
         // ****************
-        //wdh: sort these into order now for easy reading later
+        //wdh: added : sort these into order now for easy reading later
         ksort($location_config['rules']);
         // ****************
 
-        $options = array_merge( $location_defaults, $location_config );
+        $location_config = array_merge( $location_defaults, $location_config );
 
         /*--------------------------------------
 		*  save options
@@ -754,9 +761,9 @@ class acf_field_group
 
         // ********************************
         //wdh: removed
-        update_post_meta($acf_post_id, 'position', $options['position']);
-        update_post_meta($acf_post_id, 'layout', $options['layout']);
-        update_post_meta($acf_post_id, 'hide_on_screen', $options['hide_on_screen']);
+//        update_post_meta($acf_post_id, 'position', $options['position']);
+//        update_post_meta($acf_post_id, 'layout', $options['layout']);
+//        update_post_meta($acf_post_id, 'hide_on_screen', $options['hide_on_screen']);
         // ********************************
 
         $options = array_merge( $options_defaults, $options );
@@ -780,9 +787,9 @@ class acf_field_group
         $field_group_config['options']      = $options;
         $field_group_config['menu_order']   = $_POST['menu_order'];
 
-        // todo - make the post_meta UNIQUE ????
+        // todo - add theme prefix
 
-        add_post_meta( $acf_post_id, '_field_group', $field_group_config );
+        update_post_meta( $acf_post_id, '_field_group', $field_group_config );
 
         // ********************************
 

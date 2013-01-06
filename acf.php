@@ -526,34 +526,34 @@ class Acf
 	* 
 	*-------------------------------------------------------------------------------------*/
 
-	function get_acf_fields($post_id)
-	{
-		// vars
-		global $wpdb;
-		
-		$return = array();
-		
-		
-		// get field from postmeta
-		$rows = $wpdb->get_results( $wpdb->prepare("SELECT meta_key FROM $wpdb->postmeta WHERE post_id = %d AND meta_key LIKE %s", $post_id, 'field\_%'), ARRAY_A);
-		
-		if( $rows )
-		{
-			foreach( $rows as $row )
-			{
-				$field = $this->get_acf_field( $row['meta_key'], $post_id );
-	
-			 	$return[ $field['order_no'] ] = $field;
-			}
-		 	
-		 	ksort($return);
-	 	}
-	 	
-	 	
-	 	// return
-		return $return;
-		
-	}
+//	function get_acf_fields($post_id)
+//	{
+//		// vars
+//		global $wpdb;
+//
+//		$return = array();
+//
+//
+//		// get field from postmeta
+//		$rows = $wpdb->get_results( $wpdb->prepare("SELECT meta_key FROM $wpdb->postmeta WHERE post_id = %d AND meta_key LIKE %s", $post_id, 'field\_%'), ARRAY_A);
+//
+//		if( $rows )
+//		{
+//			foreach( $rows as $row )
+//			{
+//				$field = $this->get_acf_field( $row['meta_key'], $post_id );
+//
+//			 	$return[ $field['order_no'] ] = $field;
+//			}
+//
+//		 	ksort($return);
+//	 	}
+//
+//
+//	 	// return
+//		return $return;
+//
+//	}
 	
 	
 	/*--------------------------------------------------------------------------------------

@@ -22,7 +22,7 @@ class acf_Select extends acf_Field
 		
 		
 		// filters (for all fields with choices)
-		add_filter('acf_save_field-select', array($this, 'acf_save_field'));
+        add_filter('acf_save_field-select', array($this, 'acf_save_field'));
 		add_filter('acf_save_field-checkbox', array($this, 'acf_save_field'));
 		add_filter('acf_save_field-radio', array($this, 'acf_save_field'));
    	}

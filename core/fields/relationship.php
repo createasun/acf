@@ -23,6 +23,12 @@ class acf_Relationship extends acf_Field
 		
 		// actions
 		add_action('wp_ajax_acf_get_relationship_results', array($this, 'acf_get_relationship_results'));
+
+        // **************************************
+        // wdh : filtering is used on save now ( same as used in native select/checkbox/radio fields )
+        // get_value() is now redundant in all fields - but code from here is transferred into acf_save_value() fn
+        add_filter('acf_save_field_value-relationship', array($this, 'acf_save_field_value'));
+        // **************************************
 		
    	}
    	
@@ -311,27 +317,44 @@ class acf_Relationship extends acf_Field
 		<ul class="bl relationship_list">
 		<?php
 
-		if( $field['value'] )
-		{
-			foreach( $field['value'] as $post )
-			{
-				// check that post exists (my have been trashed)
-				if( !is_object($post) )
-				{
-					continue;
-				}
-				
-				
+
+        // **************************************
+        // wdh : filter value on way in (rather than on save) which converts selected post_ids to posts
+
+        // wdh : removed
+// 		if( $field['value'] )
+//		{
+//            foreach( $field['value'] as $post )
+//            {
+//
+//            }
+
+        // wdh : added
+        $posts = $this->filter_field_value( $field['value'] );
+
+        if( $posts )
+        {
+              foreach( $posts as $post )
+              {
+
+              // **************************************
+
+                // check that post exists (may have been trashed)
+                if( !is_object($post) )
+                {
+                    continue;
+                }
+
 				// right aligned info
 				$title = '<span class="relationship-item-info">';
 				
-					$title .= $post->post_type;
-					
-					// WPML
-					if( defined('ICL_LANGUAGE_CODE') )
-					{
-						$title .= ' (' . ICL_LANGUAGE_CODE . ')';
-					}
+                $title .= $post->post_type;
+
+                // WPML
+                if( defined('ICL_LANGUAGE_CODE') )
+                {
+                    $title .= ' (' . ICL_LANGUAGE_CODE . ')';
+                }
 					
 				$title .= '</span>';
 				
@@ -463,8 +486,66 @@ class acf_Relationship extends acf_Field
 		</tr>
 		<?php
 	}
-	
-	
+
+    /*--------------------------------------------------------------------------------------
+    *
+    *	filter_field_value
+    *
+    *   adapted from get_value
+    *
+    *	@author Elliot Condon / Wayne D Harris
+    *	@since 2.2.0
+    *
+    *-------------------------------------------------------------------------------------*/
+
+    function filter_field_value( $value )
+    {
+        // empty?
+        if( !$value )
+        {
+            return $value;
+        }
+
+        // Pre 3.3.3, the value is a string coma seperated
+        if( !is_array($value) )
+        {
+            $value = explode(',', $value);
+        }
+
+        // empty?
+        if( empty($value) )
+        {
+            return $value;
+        }
+
+        // find posts (DISTINCT POSTS)
+        $posts = get_posts(array(
+            'numberposts' => -1,
+            'post__in' => $value,
+            'post_type'	=>	$this->parent->get_post_types(),
+            'post_status' => array('publish', 'private', 'draft', 'inherit', 'future'),
+        ));
+
+        $ordered_posts = array();
+        foreach( $posts as $post )
+        {
+            // create array to hold value data
+            $ordered_posts[ $post->ID ] = $post;
+        }
+
+
+        // override value array with attachments
+        foreach( $value as $k => $v)
+        {
+            // check that post exists (may have been trashed)
+            if( isset($ordered_posts[ $v ]) )
+            {
+                $value[ $k ] = $ordered_posts[ $v ];
+            }
+        }
+        // return value
+        return $value;
+    }
 	/*--------------------------------------------------------------------------------------
 	*
 	*	get_value
@@ -474,65 +555,65 @@ class acf_Relationship extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function get_value($post_id, $field)
-	{
-		// get value
-		$value = parent::get_value($post_id, $field);
-		
-		
-		// empty?
-		if( !$value )
-		{
-			return $value;
-		}
-		
-		
-		// Pre 3.3.3, the value is a string coma seperated
-		if( !is_array($value) )
-		{
-			$value = explode(',', $value);
-		}
-		
-		
-		// empty?
-		if( empty($value) )
-		{
-			return $value;
-		}
-		
-		
-		// find posts (DISTINCT POSTS)
-		$posts = get_posts(array(
-			'numberposts' => -1,
-			'post__in' => $value,
-			'post_type'	=>	$this->parent->get_post_types(),
-			'post_status' => array('publish', 'private', 'draft', 'inherit', 'future'),
-		));
+//	function get_value($post_id, $field)
+//	{
+//		// get value
+//		$value = parent::get_value($post_id, $field);
+//
+//
+//		// empty?
+//		if( !$value )
+//		{
+//			return $value;
+//		}
+//
+//
+//		// Pre 3.3.3, the value is a string coma seperated
+//		if( !is_array($value) )
+//		{
+//			$value = explode(',', $value);
+//		}
+//
+//
+//		// empty?
+//		if( empty($value) )
+//		{
+//			return $value;
+//		}
+//
+//
+//		// find posts (DISTINCT POSTS)
+//		$posts = get_posts(array(
+//			'numberposts' => -1,
+//			'post__in' => $value,
+//			'post_type'	=>	$this->parent->get_post_types(),
+//			'post_status' => array('publish', 'private', 'draft', 'inherit', 'future'),
+//		));
+//
+//
+//		$ordered_posts = array();
+//		foreach( $posts as $post )
+//		{
+//			// create array to hold value data
+//			$ordered_posts[ $post->ID ] = $post;
+//		}
+//
+//
+//		// override value array with attachments
+//		foreach( $value as $k => $v)
+//		{
+//			// check that post exists (my have been trashed)
+//			if( isset($ordered_posts[ $v ]) )
+//			{
+//				$value[ $k ] = $ordered_posts[ $v ];
+//			}
+//		}
+//
+//
+//		// return value
+//		return $value;
+//	}
 
-		
-		$ordered_posts = array();
-		foreach( $posts as $post )
-		{
-			// create array to hold value data
-			$ordered_posts[ $post->ID ] = $post;
-		}
-		
-		
-		// override value array with attachments
-		foreach( $value as $k => $v)
-		{
-			// check that post exists (my have been trashed)
-			if( isset($ordered_posts[ $v ]) )
-			{
-				$value[ $k ] = $ordered_posts[ $v ];
-			}
-		}
-		
-				
-		// return value
-		return $value;	
-	}
-	
 
 	
 }
