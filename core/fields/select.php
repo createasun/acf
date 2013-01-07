@@ -272,6 +272,8 @@ class acf_Select extends acf_Field
 	
 	function acf_save_field( $field )
 	{
+        phplog('select.php','$field=',$field );
+
 		// vars
 		$defaults = array(
 			'choices'	=>	'',

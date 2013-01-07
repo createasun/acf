@@ -161,16 +161,23 @@ class acf_Repeater extends acf_Field
 		</thead>
 	<?php endif; ?>
 	<tbody>
-	<?php if( $field['value'] ): foreach( $field['value'] as $i => $value ): ?>
+	<?php
+
+        $count = 0; //wdh
+
+        if( $field['value'] ): foreach( $field['value'] as $i => $value ): ?>
 		
 		<tr class="<?php echo ( (string) $i == 'acfcloneindex') ? "row-clone" : "row"; ?>">
 		
 		<?php 
 		
 		// row number
-		
+
 		if( $field['row_limit'] > 1 ): ?>
-			<td class="order"><?php echo $i+1; ?></td>
+
+            <?php $order_num = ((string)$i == 'acfcloneindex') ? 'acfcloneindex' : $count+1; /* wdh */?>
+
+			<td class="order"><?php echo $order_num; /* wdh */?></td>
 		<?php endif; ?>
 		
 		<?php
@@ -210,7 +217,7 @@ class acf_Repeater extends acf_Field
 				$sub_field['value'] = isset($value[$sub_field['name']]) ? $value[$sub_field['name']] : '';
 					
 				// add name
-				$sub_field['name'] = $field['name'] . '[' . $i . '][' . $sub_field['key'] . ']';
+				$sub_field['name'] = $field['name'] . '[' . $count . '][' . $sub_field['key'] . ']';
 					
 				// create field
 				$this->parent->create_field($sub_field);
@@ -249,7 +256,7 @@ class acf_Repeater extends acf_Field
 		<?php endif; ?>
 		
 		</tr>
-	<?php endforeach; endif; ?>
+	<?php $count++; endforeach; endif; ?>
 	</tbody>
 	</table>
 	<?php if( $field['row_min'] < $field['row_limit'] ): ?>

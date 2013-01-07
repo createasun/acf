@@ -461,59 +461,59 @@ class Acf
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function get_field_groups()
-	{
-		// return cache
-		$cache = $this->get_cache('acf_field_groups');
-		if($cache != false)
-		{
-			return $cache;
-		}
-		
-		// vars
-		$acfs = array();
-		
-		// get acf's
-		$result = get_posts(array(
-			'numberposts' 	=> -1,
-			'post_type' 	=> 'acf',
-			'orderby' 		=> 'menu_order title',
-			'order' 		=> 'asc',
-			'suppress_filters' => false,
-		));
-
-		
-		// populate acfs
-		if($result)
-		{
-			foreach($result as $acf)
-			{
-				$acfs[] = array(
-					'id' => $acf->ID,
-					'title' => get_the_title($acf->ID),
-					'fields' => $this->get_acf_fields($acf->ID),
-					'location' => $this->get_acf_location($acf->ID),
-					'options' => $this->get_acf_options($acf->ID),
-					'menu_order' => $acf->menu_order,
-				);
-			}
-		}
-		
-		// hook to load in registered field groups
-		$acfs = apply_filters('acf_register_field_group', $acfs);
-		
-		// update cache
-		$this->set_cache('acf_field_groups', $acfs);
-		
-		// return
-		if(empty($acfs))
-		{
-			return false;
-		}
-		
-		
-		return $acfs;
-	}
+//	function get_field_groups()
+//	{
+//		// return cache
+//		$cache = $this->get_cache('acf_field_groups');
+//		if($cache != false)
+//		{
+//			return $cache;
+//		}
+//
+//		// vars
+//		$acfs = array();
+//
+//		// get acf's
+//		$result = get_posts(array(
+//			'numberposts' 	=> -1,
+//			'post_type' 	=> 'acf',
+//			'orderby' 		=> 'menu_order title',
+//			'order' 		=> 'asc',
+//			'suppress_filters' => false,
+//		));
+//
+//
+//		// populate acfs
+//		if($result)
+//		{
+//			foreach($result as $acf)
+//			{
+//				$acfs[] = array(
+//					'id' => $acf->ID,
+//					'title' => get_the_title($acf->ID),
+//					'fields' => $this->get_acf_fields($acf->ID),
+//					'location' => $this->get_acf_location($acf->ID),
+//					'options' => $this->get_acf_options($acf->ID),
+//					'menu_order' => $acf->menu_order,
+//				);
+//			}
+//		}
+//
+//		// hook to load in registered field groups
+//		$acfs = apply_filters('acf_register_field_group', $acfs);
+//
+//		// update cache
+//		$this->set_cache('acf_field_groups', $acfs);
+//
+//		// return
+//		if(empty($acfs))
+//		{
+//			return false;
+//		}
+//
+//
+//		return $acfs;
+//	}
 	
 	
 	/*--------------------------------------------------------------------------------------
@@ -570,51 +570,51 @@ class Acf
 
 	function get_acf_field( $field_key, $post_id = false )
 	{
-		
-		
+
+
 		// return cache
 		$cache = $this->get_cache('acf_field_' . $field_key);
 		if($cache != false)
 		{
 			return $cache;
 		}
-		
-		
+
+
 		// vars
 		global $wpdb;
-		
-		
+
+
 		// get field from postmeta
 		$sql = $wpdb->prepare("SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = %s", $field_key);
-		
+
 		if( $post_id )
 		{
 			$sql .= $wpdb->prepare("AND post_id = %d", $post_id);
 		}
 
 		$row = $wpdb->get_results( $sql, ARRAY_A );
-		
-		
-		
+
+
+
 		if( $row )
 		{
 			$row = $row[0];
-			
-			
+
+
 			// return field if it is not in a trashed field group
 			if( get_post_status( $row['post_id'] ) != "trash" )
 			{
 				$row['meta_value'] = maybe_unserialize( $row['meta_value'] );
 				$row['meta_value'] = maybe_unserialize( $row['meta_value'] ); // run again for WPML
-				
-				
+
+
 				// store field
 				$field = $row['meta_value'];
-				
-				
+
+
 				// apply filters
 				$field = apply_filters('acf_load_field', $field);
-				
+
 				$keys = array('type', 'name', 'key');
 				foreach( $keys as $key )
 				{
@@ -623,23 +623,23 @@ class Acf
 						$value = apply_filters('acf_load_field-' . $field[ $key ], $field);
 					}
 				}
-				
-			
+
+
 				// set cache
 				$this->set_cache('acf_field_' . $field_key, $field);
 
 //                phplog('acf.php','$field_key=',$field_key );
 //                phplog('acf.php','$field=',$field );
-				
+
 				return $field;
 			}
 		}
-		
+
 
 
 		// hook to load in registered field groups
 		$acfs = $this->get_field_groups();
-		
+
 		if($acfs)
 		{
 			// loop through acfs
@@ -654,7 +654,7 @@ class Acf
 						{
 							// apply filters
 							$field = apply_filters('acf_load_field', $field);
-							
+
 							$keys = array('type', 'name', 'key');
 							foreach( $keys as $key )
 							{
@@ -663,11 +663,11 @@ class Acf
 									$value = apply_filters('acf_load_field-' . $field[ $key ], $field);
 								}
 							}
-							
-							
+
+
 							// set cache
 							$this->set_cache('acf_field_' . $field_key, $field);
-							
+
 							return $field;
 						}
 					}
@@ -678,7 +678,7 @@ class Acf
 		}
 		// if($acfs)
 
- 		
+
  		return null;
 	}
 	
@@ -693,7 +693,9 @@ class Acf
 	
 	function acf_load_field( $field )
 	{
-		if( !is_array($field) )
+        phplog('acf.php','$field=',$field );
+
+        if( !is_array($field) )
 		{
 			return $field;	
 		}
@@ -867,50 +869,50 @@ class Acf
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function get_acf_location($post_id)
-	{
-		// defaults
-		$return = array(
-	 		'rules'		=>	array(),
-	 		'allorany'	=>	'all', 
-	 	);
-		
-		
-		// vars
-		$allorany = get_post_meta($post_id, 'allorany', true);
-		if( $allorany )
-		{
-			$return['allorany'] = $allorany;
-		}
-		
-		
-		// get all fields
-	 	$rules = get_post_meta($post_id, 'rule', false);
-	 	
-
-	 	if($rules)
-	 	{
-	 		
-		 	foreach($rules as $rule)
-		 	{
-		 		// if field group was duplicated, it may now be a serialized string!
-		 		$rule = maybe_unserialize($rule);
-		
-		
-		 		$return['rules'][$rule['order_no']] = $rule;
-		 	}
-	 	}
-	 	
-	 	
-	 	// sort
-	 	ksort($return['rules']);
-	 	
-	 	
-	 	// return fields
-		return $return;
-	 	
-	}
-	
+//	function get_acf_location($post_id)
+//	{
+//		// defaults
+//		$return = array(
+//	 		'rules'		=>	array(),
+//	 		'allorany'	=>	'all',
+//	 	);
+//
+//
+//		// vars
+//		$allorany = get_post_meta($post_id, 'allorany', true);
+//		if( $allorany )
+//		{
+//			$return['allorany'] = $allorany;
+//		}
+//
+//
+//		// get all fields
+//	 	$rules = get_post_meta($post_id, 'rule', false);
+//
+//
+//	 	if($rules)
+//	 	{
+//
+//		 	foreach($rules as $rule)
+//		 	{
+//		 		// if field group was duplicated, it may now be a serialized string!
+//		 		$rule = maybe_unserialize($rule);
+//
+//
+//		 		$return['rules'][$rule['order_no']] = $rule;
+//		 	}
+//	 	}
+//
+//
+//	 	// sort
+//	 	ksort($return['rules']);
+//
+//
+//	 	// return fields
+//		return $return;
+//
+//	}
+//
 	
 	/*--------------------------------------------------------------------------------------
 	*
@@ -921,42 +923,42 @@ class Acf
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function get_acf_options($post_id)
-	{
-		
-		// defaults
-	 	$options = array(
-	 		'position'			=>	'normal',
-	 		'layout'			=>	'no_box',
-	 		'hide_on_screen'	=>	array(),
-	 	);
-	 	
-	 	
-	 	// vars
-	 	$position = get_post_meta($post_id, 'position', true);
-	 	if( $position )
-		{
-			$options['position'] = $position;
-		}
-		
-		$layout = get_post_meta($post_id, 'layout', true);
-	 	if( $layout )
-		{
-			$options['layout'] = $layout;
-		}
-		
-		$hide_on_screen = get_post_meta($post_id, 'hide_on_screen', true);
-	 	if( $hide_on_screen )
-		{
-			$hide_on_screen = maybe_unserialize($hide_on_screen);
-			$options['hide_on_screen'] = $hide_on_screen;
-		}
-		
-	 	
-	 	// return
-	 	return $options;
-	}
-	
+//	function get_acf_options($post_id)
+//	{
+//
+//		// defaults
+//	 	$options = array(
+//	 		'position'			=>	'normal',
+//	 		'layout'			=>	'no_box',
+//	 		'hide_on_screen'	=>	array(),
+//	 	);
+//
+//
+//	 	// vars
+//	 	$position = get_post_meta($post_id, 'position', true);
+//	 	if( $position )
+//		{
+//			$options['position'] = $position;
+//		}
+//
+//		$layout = get_post_meta($post_id, 'layout', true);
+//	 	if( $layout )
+//		{
+//			$options['layout'] = $layout;
+//		}
+//
+//		$hide_on_screen = get_post_meta($post_id, 'hide_on_screen', true);
+//	 	if( $hide_on_screen )
+//		{
+//			$hide_on_screen = maybe_unserialize($hide_on_screen);
+//			$options['hide_on_screen'] = $hide_on_screen;
+//		}
+//
+//
+//	 	// return
+//	 	return $options;
+//	}
+//
 	
 	
 	/*--------------------------------------------------------------------------------------
@@ -1086,52 +1088,52 @@ class Acf
 	*  @created: 23/06/12
 	*/
 	
-	function render_fields_for_input($fields, $post_id)
-	{
-			
-		// create fields
-		if($fields)
-		{
-			foreach($fields as $field)
-			{
-				// if they didn't select a type, skip this field
-				if(!$field['type'] || $field['type'] == 'null') continue;
-				
-				
-				// set value
-				if( ! isset($field['value']) )
-				{	
-					$field['value'] = $this->get_value($post_id, $field);
-				}
-				
-				
-				$required_class = "";
-				$required_label = "";
-				
-				if( $field['required'] )
-				{
-					$required_class = ' required';
-					$required_label = ' <span class="required">*</span>';
-				}
-				
-				echo '<div id="acf-' . $field['name'] . '" class="field field-' . $field['type'] . ' field-' . $field['key'] . $required_class . '" data-field_name="' . $field['name'] . '" data-field_key="' . $field['key'] . '">';
-
-					echo '<p class="label">';
-						echo '<label for="fields[' . $field['key'] . ']">' . $field['label'] . $required_label . '</label>';
-						echo $field['instructions'];
-					echo '</p>';
-					
-					$field['name'] = 'fields[' . $field['key'] . ']';
-					$this->create_field($field);
-				
-				echo '</div>';
-				
-			}
-			// foreach($fields as $field)
-		}
-		// if($fields)
-		
-	}
+//	function render_fields_for_input($fields, $post_id)
+//	{
+//
+//		// create fields
+//		if($fields)
+//		{
+//			foreach($fields as $field)
+//			{
+//				// if they didn't select a type, skip this field
+//				if(!$field['type'] || $field['type'] == 'null') continue;
+//
+//
+//				// set value
+//				if( ! isset($field['value']) )
+//				{
+//					$field['value'] = $this->get_value($post_id, $field);
+//				}
+//
+//
+//				$required_class = "";
+//				$required_label = "";
+//
+//				if( $field['required'] )
+//				{
+//					$required_class = ' required';
+//					$required_label = ' <span class="required">*</span>';
+//				}
+//
+//				echo '<div id="acf-' . $field['name'] . '" class="field field-' . $field['type'] . ' field-' . $field['key'] . $required_class . '" data-field_name="' . $field['name'] . '" data-field_key="' . $field['key'] . '">';
+//
+//					echo '<p class="label">';
+//						echo '<label for="fields[' . $field['key'] . ']">' . $field['label'] . $required_label . '</label>';
+//						echo $field['instructions'];
+//					echo '</p>';
+//
+//					$field['name'] = 'fields[' . $field['key'] . ']';
+//					$this->create_field($field);
+//
+//				echo '</div>';
+//
+//			}
+//			// foreach($fields as $field)
+//		}
+//		// if($fields)
+//
+//	}
 	
 	
 	/*--------------------------------------------------------------------------------------
@@ -2041,33 +2043,33 @@ class Acf
 	*  @created: 4/09/12
 	*/
 	
-	function acf_save_post( $post_id )
-	{
-
-		// load from post
-		if( !isset($_POST['fields']) )
-		{
-			return false;
-		}
-		
-		
-		// loop through and save
-		if( $_POST['fields'] )
-		{
-			foreach( $_POST['fields'] as $key => $value )
-			{
-				// get field
-				$field = $this->get_acf_field($key);
-				
-				$this->update_value($post_id, $field, $value);
-			}
-			// foreach($fields as $key => $value)
-		}
-		// if($fields)
-		
-		
-		return true;
-	}
+//	function acf_save_post( $post_id )
+//	{
+//
+//		// load from post
+//		if( !isset($_POST['fields']) )
+//		{
+//			return false;
+//		}
+//
+//
+//		// loop through and save
+//		if( $_POST['fields'] )
+//		{
+//			foreach( $_POST['fields'] as $key => $value )
+//			{
+//				// get field
+//				$field = $this->get_acf_field($key);
+//
+//				$this->update_value($post_id, $field, $value);
+//			}
+//			// foreach($fields as $key => $value)
+//		}
+//		// if($fields)
+//
+//
+//		return true;
+//	}
 	
 	
 	
