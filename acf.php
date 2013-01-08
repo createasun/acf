@@ -568,119 +568,119 @@ class Acf
 	* 
 	*-------------------------------------------------------------------------------------*/
 
-	function get_acf_field( $field_key, $post_id = false )
-	{
-
-
-		// return cache
-		$cache = $this->get_cache('acf_field_' . $field_key);
-		if($cache != false)
-		{
-			return $cache;
-		}
-
-
-		// vars
-		global $wpdb;
-
-
-		// get field from postmeta
-		$sql = $wpdb->prepare("SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = %s", $field_key);
-
-		if( $post_id )
-		{
-			$sql .= $wpdb->prepare("AND post_id = %d", $post_id);
-		}
-
-		$row = $wpdb->get_results( $sql, ARRAY_A );
-
-
-
-		if( $row )
-		{
-			$row = $row[0];
-
-
-			// return field if it is not in a trashed field group
-			if( get_post_status( $row['post_id'] ) != "trash" )
-			{
-				$row['meta_value'] = maybe_unserialize( $row['meta_value'] );
-				$row['meta_value'] = maybe_unserialize( $row['meta_value'] ); // run again for WPML
-
-
-				// store field
-				$field = $row['meta_value'];
-
-
-				// apply filters
-				$field = apply_filters('acf_load_field', $field);
-
-				$keys = array('type', 'name', 'key');
-				foreach( $keys as $key )
-				{
-					if( isset($field[ $key ]) )
-					{
-						$value = apply_filters('acf_load_field-' . $field[ $key ], $field);
-					}
-				}
-
-
-				// set cache
-				$this->set_cache('acf_field_' . $field_key, $field);
-
-//                phplog('acf.php','$field_key=',$field_key );
-//                phplog('acf.php','$field=',$field );
-
-				return $field;
-			}
-		}
-
-
-
-		// hook to load in registered field groups
-		$acfs = $this->get_field_groups();
-
-		if($acfs)
-		{
-			// loop through acfs
-			foreach($acfs as $acf)
-			{
-				// loop through fields
-				if($acf['fields'])
-				{
-					foreach($acf['fields'] as $field)
-					{
-						if($field['key'] == $field_key)
-						{
-							// apply filters
-							$field = apply_filters('acf_load_field', $field);
-
-							$keys = array('type', 'name', 'key');
-							foreach( $keys as $key )
-							{
-								if( isset($field[ $key ]) )
-								{
-									$value = apply_filters('acf_load_field-' . $field[ $key ], $field);
-								}
-							}
-
-
-							// set cache
-							$this->set_cache('acf_field_' . $field_key, $field);
-
-							return $field;
-						}
-					}
-				}
-				// if($acf['fields'])
-			}
-			// foreach($acfs as $acf)
-		}
-		// if($acfs)
-
-
- 		return null;
-	}
+//	function get_acf_field( $field_key, $post_id = false )
+//	{
+//
+//
+//		// return cache
+//		$cache = $this->get_cache('acf_field_' . $field_key);
+//		if($cache != false)
+//		{
+//			return $cache;
+//		}
+//
+//
+//		// vars
+//		global $wpdb;
+//
+//
+//		// get field from postmeta
+//		$sql = $wpdb->prepare("SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = %s", $field_key);
+//
+//		if( $post_id )
+//		{
+//			$sql .= $wpdb->prepare("AND post_id = %d", $post_id);
+//		}
+//
+//		$row = $wpdb->get_results( $sql, ARRAY_A );
+//
+//
+//
+//		if( $row )
+//		{
+//			$row = $row[0];
+//
+//
+//			// return field if it is not in a trashed field group
+//			if( get_post_status( $row['post_id'] ) != "trash" )
+//			{
+//				$row['meta_value'] = maybe_unserialize( $row['meta_value'] );
+//				$row['meta_value'] = maybe_unserialize( $row['meta_value'] ); // run again for WPML
+//
+//
+//				// store field
+//				$field = $row['meta_value'];
+//
+//
+//				// apply filters
+//				$field = apply_filters('acf_load_field', $field);
+//
+//				$keys = array('type', 'name', 'key');
+//				foreach( $keys as $key )
+//				{
+//					if( isset($field[ $key ]) )
+//					{
+//						$value = apply_filters('acf_load_field-' . $field[ $key ], $field);
+//					}
+//				}
+//
+//
+//				// set cache
+//				$this->set_cache('acf_field_' . $field_key, $field);
+//
+////                phplog('acf.php','$field_key=',$field_key );
+////                phplog('acf.php','$field=',$field );
+//
+//				return $field;
+//			}
+//		}
+//
+//
+//
+//		// hook to load in registered field groups
+//		$acfs = $this->get_field_groups();
+//
+//		if($acfs)
+//		{
+//			// loop through acfs
+//			foreach($acfs as $acf)
+//			{
+//				// loop through fields
+//				if($acf['fields'])
+//				{
+//					foreach($acf['fields'] as $field)
+//					{
+//						if($field['key'] == $field_key)
+//						{
+//							// apply filters
+//							$field = apply_filters('acf_load_field', $field);
+//
+//							$keys = array('type', 'name', 'key');
+//							foreach( $keys as $key )
+//							{
+//								if( isset($field[ $key ]) )
+//								{
+//									$value = apply_filters('acf_load_field-' . $field[ $key ], $field);
+//								}
+//							}
+//
+//
+//							// set cache
+//							$this->set_cache('acf_field_' . $field_key, $field);
+//
+//							return $field;
+//						}
+//					}
+//				}
+//				// if($acf['fields'])
+//			}
+//			// foreach($acfs as $acf)
+//		}
+//		// if($acfs)
+//
+//
+// 		return null;
+//	}
 	
 	
 	/*
@@ -790,13 +790,17 @@ class Acf
 		if( ! isset($field['id']) )
 		{
 			$id = $field['name'];
+            $id = str_replace('fields[', '', $id);
 			$id = str_replace('][', '_', $id);
-			$id = str_replace('fields[', '', $id);
 			$id = str_replace('[', '-', $id); // location rules (select) does'nt have "fields[" in it
 			$id = str_replace(']', '', $id);
 			
-			
+			//**********************************
+            // todo : do we wish to add prefix here ??
 			$field['id'] = 'acf-' . $id;
+
+
+            //**********************************
 		}
 		
 		
@@ -967,6 +971,8 @@ class Acf
 	*
 	*	@author Elliot Condon
 	*	@since 3.0.0
+	 *
+	 *  wdh : redundant
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
@@ -976,12 +982,12 @@ class Acf
 		{
 			$this->setup_fields();
 		}
-		
+
 		if( !isset($field['type'], $this->fields[ $field['type'] ]) )
 		{
 			return false;
 		}
-				
+
 		return $this->fields[$field['type']]->get_value($post_id, $field);
 	}
 	
@@ -1017,6 +1023,8 @@ class Acf
 	*
 	*	@author Elliot Condon
 	*	@since 3.0.0
+	 *
+	 * wdh : redundant
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
@@ -1035,6 +1043,9 @@ class Acf
 	*
 	*	@author Elliot Condon
 	*	@since 3.0.0
+	 *
+	 *
+	 * wdh : redundant
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
@@ -1390,7 +1401,12 @@ class Acf
 		        if( $rule['value'] == 'posts_page')
 		        {
 			        $posts_page = (int) get_option('page_for_posts');
-			        
+
+                    // todo : tighten up ??
+
+                    // wdh : replace with..
+//                  return ( ($rule['operator'] == "==") && ($posts_page == $page) ) || ( ($rule['operator'] == "!=") && ($posts_page != $page) );
+
 			        if( $rule['operator'] == "==" )
 			        {
 			        	if( $posts_page == $page )

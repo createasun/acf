@@ -127,7 +127,15 @@ class acf_Flexible_content extends acf_Field
 									$sub_field['value'] = isset($sub_field['default_value']) ? $sub_field['default_value'] : false;
 									
 									// add name
-									$sub_field['name'] = $field['name'] . '[acfcloneindex][' . $sub_field['key'] . ']';
+
+
+                                    // *********************
+                                    // wdh : we are using the name/slug as key not the 'field_n' key
+                                    // wdh : removed
+//                                  $sub_field['name'] = $field['name'] . '[acfcloneindex][' . $sub_field['key'] . ']';
+                                    // wdh : added
+                                    $sub_field['name'] = $field['name'] . '[acfcloneindex][' . $sub_field['name'] . ']';
+                                    // *********************
 									
 									// create field
 									$this->parent->create_field($sub_field);
@@ -251,9 +259,15 @@ class acf_Flexible_content extends acf_Field
 										
 										// add value
 										$sub_field['value'] = isset($value[$sub_field['name']]) ? $value[$sub_field['name']] : false;
-										
-										// add name
-										$sub_field['name'] = $field['name'] . '[' . $i . '][' . $sub_field['key'] . ']';
+
+                                        // *********************
+                                        // wdh : we are using the name/slug as key not the 'field_n' key
+                                        // wdh : removed
+//                                      $sub_field['name'] = $field['name'] . '[' . $i . '][' . $sub_field['key'] . ']';
+                                        // wdh : added
+                                        $sub_field['name'] = $field['name'] . '[' . $i . '][' . $sub_field['name'] . ']';
+                                        // *********************
+
 										
 										// create field
 										$this->parent->create_field($sub_field);
@@ -627,53 +641,53 @@ class acf_Flexible_content extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function update_value($post_id, $field, $value)
-	{
-		$sub_fields = array();
-		
-		foreach($field['layouts'] as $layout)
-		{
-			foreach($layout['sub_fields'] as $sub_field)
-			{
-				$sub_fields[$sub_field['key']] = $sub_field;
-			}
-		}
-
-		$total = array();
-		
-		if($value)
-		{
-			// remove dummy field
-			unset($value['acfcloneindex']);
-			
-			$i = -1;
-			
-			// loop through rows
-			foreach($value as $row)
-			{	
-				$i++;
-				
-				// increase total
-				$total[] = $row['acf_fc_layout'];
-				unset($row['acf_fc_layout']);
-					
-				// loop through sub fields
-				foreach($row as $field_key => $value)
-				{
-					$sub_field = $sub_fields[$field_key];
-
-					// update full name
-					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
-					
-					// save sub field value
-					$this->parent->update_value($post_id, $sub_field, $value);
-				}
-			}
-		}
-		
-		parent::update_value($post_id, $field, $total);
-		
-	}
+//	function update_value($post_id, $field, $value)
+//	{
+//		$sub_fields = array();
+//
+//		foreach($field['layouts'] as $layout)
+//		{
+//			foreach($layout['sub_fields'] as $sub_field)
+//			{
+//				$sub_fields[$sub_field['key']] = $sub_field;
+//			}
+//		}
+//
+//		$total = array();
+//
+//		if($value)
+//		{
+//			// remove dummy field
+//			unset($value['acfcloneindex']);
+//
+//			$i = -1;
+//
+//			// loop through rows
+//			foreach($value as $row)
+//			{
+//				$i++;
+//
+//				// increase total
+//				$total[] = $row['acf_fc_layout'];
+//				unset($row['acf_fc_layout']);
+//
+//				// loop through sub fields
+//				foreach($row as $field_key => $value)
+//				{
+//					$sub_field = $sub_fields[$field_key];
+//
+//					// update full name
+//					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
+//
+//					// save sub field value
+//					$this->parent->update_value($post_id, $sub_field, $value);
+//				}
+//			}
+//		}
+//
+//		parent::update_value($post_id, $field, $total);
+//
+//	}
 	
 	
 	/*--------------------------------------------------------------------------------------
@@ -720,9 +734,16 @@ class acf_Flexible_content extends acf_Field
 						// apply filters
 						$f = apply_filters('acf_save_field', $f );
 						$f = apply_filters('acf_save_field-' . $f['type'], $f );
-						
-						
-						$sub_fields[ $f['key'] ] = $f;
+
+                        // ********************************
+                        // ** important **
+                        // wdh : save field via key = name not 'field_n' key
+                        // wdh : removed
+//				        $sub_fields[ $f['key'] ] = $f;
+                        // wdh : added
+                        $sub_fields[ $f['name'] ] = $f;
+                        // ********************************
+
 						
 					}
 					
@@ -751,56 +772,56 @@ class acf_Flexible_content extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function get_value($post_id, $field)
-	{
-		$layouts = array();
-		foreach($field['layouts'] as $l)
-		{
-			$layouts[$l['name']] = $l;
-		}
-
-		// vars
-		$values = array();
-		$layout_order = false;
-		
-		
-		// get total rows
-		$layout_order = parent::get_value($post_id, $field);
-		
-
-		if( !empty( $layout_order) )
-		{
-			$i = -1;
-			// loop through rows
-			foreach($layout_order as $layout)
-			{
-				$i++;
-				$values[$i]['acf_fc_layout'] = $layout;
-				
-				// check if layout still exists
-				if(isset($layouts[$layout]))
-				{
-					// loop through sub fields
-					foreach($layouts[$layout]['sub_fields'] as $sub_field)
-					{
-						// store name
-						$field_name = $sub_field['name'];
-						
-						// update full name
-						$sub_field['name'] = $field['name'] . '_' . $i . '_' . $field_name;
-						
-						$values[$i][$field_name] = $this->parent->get_value($post_id, $sub_field);
-					}
-				}
-			}
-		}
-		else
-		{
-			$values = false;
-		}
-
-		return $values;	
-	}
+//	function get_value($post_id, $field)
+//	{
+//		$layouts = array();
+//		foreach($field['layouts'] as $l)
+//		{
+//			$layouts[$l['name']] = $l;
+//		}
+//
+//		// vars
+//		$values = array();
+//		$layout_order = false;
+//
+//
+//		// get total rows
+//		$layout_order = parent::get_value($post_id, $field);
+//
+//
+//		if( !empty( $layout_order) )
+//		{
+//			$i = -1;
+//			// loop through rows
+//			foreach($layout_order as $layout)
+//			{
+//				$i++;
+//				$values[$i]['acf_fc_layout'] = $layout;
+//
+//				// check if layout still exists
+//				if(isset($layouts[$layout]))
+//				{
+//					// loop through sub fields
+//					foreach($layouts[$layout]['sub_fields'] as $sub_field)
+//					{
+//						// store name
+//						$field_name = $sub_field['name'];
+//
+//						// update full name
+//						$sub_field['name'] = $field['name'] . '_' . $i . '_' . $field_name;
+//
+//						$values[$i][$field_name] = $this->parent->get_value($post_id, $sub_field);
+//					}
+//				}
+//			}
+//		}
+//		else
+//		{
+//			$values = false;
+//		}
+//
+//		return $values;
+//	}
 	
 	
 	/*--------------------------------------------------------------------------------------

@@ -221,8 +221,9 @@ class acf_input
 				
 				// add meta box
 				add_meta_box(
-					'acf_' . $acf['id'],                            //metabox unique id : will be used in html #id and as the key to field group post_meta
-					$acf['title'],                                  //metabox title
+                    // wdh : use acf post_name as metabox id - there can be only one field group type per page
+                    $acf['name'],      //'acf_' . $acf['id'],
+					$acf['title'],                              //metabox title
 					array($this, 'meta_box_input'), 
 					$typenow, 
 					$acf['options']['position'], 
@@ -249,7 +250,7 @@ class acf_input
     *
     *  @description: called by admin_head to generate acf css style (hide other metaboxes)
     *  @since 2.0.5
-    *  @rewrite: 05/01/13
+    *  @rewrite: 05/01/13 by wdh
     *  @author: Wayne D Harris / Elliot Condon
     *-------------------------------------------------------------------------------------*/
     function get_input_style( $acf_id = false )
@@ -289,7 +290,7 @@ class acf_input
     *
     *  @description: hide metabox style
     *  @since 2.0.5
-    *  @rewrite: 05/01/13
+    *  @rewrite: 05/01/13 by wdh
     *  @author: Wayne D Harris / Elliot Condon
     *-------------------------------------------------------------------------------------*/
     function maybe_hide_metabox_style( $options_hide_array, $style_key, $style_name )

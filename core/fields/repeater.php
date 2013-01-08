@@ -24,256 +24,289 @@ class acf_Repeater extends acf_Field
 		// filters
 		add_filter('acf_save_field-' . $this->name, array($this, 'acf_save_field'));
    	}
-   	
-	
-	
-	/*--------------------------------------------------------------------------------------
-	*
-	*	create_field
-	*
-	*	@author Elliot Condon
-	*	@since 2.0.5
-	*	@updated 2.2.0
-	* 
-	*-------------------------------------------------------------------------------------*/
-	
-	function create_field($field)
-	{
-		// vars
-		$defaults = array(
-			'row_limit'		=>	0,
-			'row_min'		=>	0,
-			'layout' 		=> 'table',
-			'sub_fields'	=>	array(),
-			'button_label'	=>	__("Add Row",'acf'),
-			'value'			=>	array(),
-		);
-		
-		$field = array_merge($defaults, $field);
-		
-		
-		// validate types
-		$field['row_limit'] = (int) $field['row_limit'];
-		$field['row_min'] = (int) $field['row_min'];
-		
-		
-		// value may be false
-		if( !$field['value'] )
-		{
-			$field['value'] = array();
-		}
-		
-		
-		// row limit = 0?
-		if( $field['row_limit'] < 1 )
-		{
-			$field['row_limit'] = 999;
-		}
-		
-		
 
-		// min rows
-		if( $field['row_min'] > count($field['value']) )
-		{
-			for( $i = 0; $i < $field['row_min']; $i++ )
-			{
-				// already have a value? continue...
-				if( isset($field['value'][$i]) )
-				{
-					continue;
-				}
-				
-				// populate values
-				$field['value'][$i] = array();
-				
-				foreach( $field['sub_fields'] as $sub_field)
-				{
-					$sub_value = isset($sub_field['default_value']) ? $sub_field['default_value'] : false;
-					$field['value'][$i][ $sub_field['name'] ] = $sub_value;
-				}
-				
-			}
-		}
+    /**
+     * Replaces the keys in the given array with an array of in-order
+     * replacement keys.
+     *
+     * @param array &$array
+     * @param array $replacement_keys
+     **/
+    function renameKeys(&$array, $replacement_keys)
+    {
+        $keys   = array_keys($array);
+        $values = array_values($array);
 
-		
-		// max rows
-		if( $field['row_limit'] < count($field['value']) )
-		{
-			for( $i = 0; $i < count($field['value']); $i++ )
-			{
-				if( $i >= $field['row_limit'] )
-				{
-					unset( $field['value'][$i] );
-				}
-			}
-		}
+        for ($i=0; $i < count($replacement_keys); $i++) {
+            $keys[$i] = $replacement_keys[$i];
+        }
 
-		
-		// setup values for row clone
-		$field['value']['acfcloneindex'] = array();
-		foreach( $field['sub_fields'] as $sub_field)
-		{
-			$sub_value = isset($sub_field['default_value']) ? $sub_field['default_value'] : false;
-			$field['value']['acfcloneindex'][ $sub_field['name'] ] = $sub_value;
-		}
+        $array = array_combine($keys, $values);
+    }
 
-?>
-<div class="repeater" data-min_rows="<?php echo $field['row_min']; ?>" data-max_rows="<?php echo $field['row_limit']; ?>">
-	<table class="widefat acf-input-table <?php if( $field['layout'] == 'row' ): ?>row_layout<?php endif; ?>">
-	<?php if( $field['layout'] == 'table' ): ?>
-		<thead>
-			<tr>
-				<?php 
-				
-				// order th
-				
-				if( $field['row_limit'] > 1 ): ?>
-					<th class="order"></th>
-				<?php endif; ?>
-				
-				<?php foreach( $field['sub_fields'] as $sub_field_i => $sub_field): 
-					
-					// add width attr
-					$attr = "";
-					
-					if( count($field['sub_fields']) > 1 && isset($sub_field['column_width']) && $sub_field['column_width'] )
-					{
-						$attr = 'width="' . $sub_field['column_width'] . '%"';
-					}
-					
-					?>
-					<th class="acf-th-<?php echo $sub_field['name']; ?>" <?php echo $attr; ?>>
-						<span><?php echo $sub_field['label']; ?></span>
-						<?php if( isset($sub_field['instructions']) ): ?>
-							<span class="sub-field-instructions"><?php echo $sub_field['instructions']; ?></span>
-						<?php endif; ?>
-					</th><?php
-				endforeach; ?>
-							
-				<?php
-				
-				// remove th
-							
-				if( $field['row_min'] < $field['row_limit'] ):  ?>
-					<th class="remove"></th>
-				<?php endif; ?>
-			</tr>
-		</thead>
-	<?php endif; ?>
-	<tbody>
-	<?php
+    /*--------------------------------------------------------------------------------------
+    *
+    *	create_field
+    *
+    *	@author Elliot Condon
+    *	@since 2.0.5
+    *	@updated 2.2.0
+    *
+    *-------------------------------------------------------------------------------------*/
 
-        $count = 0; //wdh
+    function create_field($field)
+    {
+        // vars
+        $defaults = array(
+            'row_limit'		=>	0,
+            'row_min'		=>	0,
+            'layout' 		=> 'table',
+            'sub_fields'	=>	array(),
+            'button_label'	=>	__("Add Row",'acf'),
+            'value'			=>	array(),
+        );
 
-        if( $field['value'] ): foreach( $field['value'] as $i => $value ): ?>
-		
-		<tr class="<?php echo ( (string) $i == 'acfcloneindex') ? "row-clone" : "row"; ?>">
-		
-		<?php 
-		
-		// row number
+        $field = array_merge($defaults, $field);
 
-		if( $field['row_limit'] > 1 ): ?>
 
-            <?php $order_num = ((string)$i == 'acfcloneindex') ? 'acfcloneindex' : $count+1; /* wdh */?>
+        // validate types
+        $field['row_limit'] = (int) $field['row_limit'];
+        $field['row_min'] = (int) $field['row_min'];
 
-			<td class="order"><?php echo $order_num; /* wdh */?></td>
-		<?php endif; ?>
-		
-		<?php
-		
-		// layout: Row
-		
-		if( $field['layout'] == 'row' ): ?>
+
+        // value may be false
+        if( !$field['value'] )
+        {
+            $field['value'] = array();
+        }
+
+
+        // row limit = 0?
+        if( $field['row_limit'] < 1 )
+        {
+            $field['row_limit'] = 999;
+        }
+
+
+
+        // min rows
+        if( $field['row_min'] > count($field['value']) )
+        {
+            for( $i = 0; $i < $field['row_min']; $i++ )
+            {
+                // already have a value? continue...
+                if( isset($field['value'][$i]) )
+                {
+                    continue;
+                }
+
+                // populate values
+                $field['value'][$i] = array();
+
+                foreach( $field['sub_fields'] as $sub_field)
+                {
+                    $sub_value = isset($sub_field['default_value']) ? $sub_field['default_value'] : false;
+                    $field['value'][$i][ $sub_field['name'] ] = $sub_value;
+                }
+
+            }
+        }
+
+
+        // max rows
+        if( $field['row_limit'] < count($field['value']) )
+        {
+            for( $i = 0; $i < count($field['value']); $i++ )
+            {
+                if( $i >= $field['row_limit'] )
+                {
+                    unset( $field['value'][$i] );
+                }
+            }
+        }
+
+
+        // setup values for row clone
+        $field['value']['acfcloneindex'] = array();
+        foreach( $field['sub_fields'] as $sub_field)
+        {
+            $sub_value = isset($sub_field['default_value']) ? $sub_field['default_value'] : false;
+            $field['value']['acfcloneindex'][ $sub_field['name'] ] = $sub_value;
+        }
+
+        // *********************
+        // wdh : added : replace unique keys set in input-actions.js/repeater_add_field() with integer indexes
+        // todo : change order with new index ??
+        if( $field['value'] )
+        {
+            $keys   = array_keys( $field['value'] );
+            $values = array_values( $field['value'] );
+
+            for ( $k=0; $k < count($field['value']); $k++ )
+            {
+                $keys[$k] = ( (string)$keys[$k] == 'acfcloneindex' ) ? 'acfcloneindex' : $k;
+            }
+
+            $field['value'] = array_combine($keys, $values);
+
+        }
+        // *********************
+
+        ?>
+    <div class="repeater" data-min_rows="<?php echo $field['row_min']; ?>" data-max_rows="<?php echo $field['row_limit']; ?>">
+        <table class="widefat acf-input-table <?php if( $field['layout'] == 'row' ): ?>row_layout<?php endif; ?>">
+            <?php if( $field['layout'] == 'table' ): ?>
+            <thead>
+            <tr>
+                <?php
+
+                // order th
+
+                if( $field['row_limit'] > 1 ): ?>
+                    <th class="order"></th>
+                    <?php endif; ?>
+
+                <?php foreach( $field['sub_fields'] as $sub_field_i => $sub_field):
+
+                // add width attr
+                $attr = "";
+
+                if( count($field['sub_fields']) > 1 && isset($sub_field['column_width']) && $sub_field['column_width'] )
+                {
+                    $attr = 'width="' . $sub_field['column_width'] . '%"';
+                }
+
+                ?>
+                <th class="acf-th-<?php echo $sub_field['name']; ?>" <?php echo $attr; ?>>
+                    <span><?php echo $sub_field['label']; ?></span>
+                    <?php if( isset($sub_field['instructions']) ): ?>
+                    <span class="sub-field-instructions"><?php echo $sub_field['instructions']; ?></span>
+                    <?php endif; ?>
+                </th><?php
+            endforeach; ?>
+
+                <?php
+
+                // remove th
+
+                if( $field['row_min'] < $field['row_limit'] ):  ?>
+                    <th class="remove"></th>
+                    <?php endif; ?>
+            </tr>
+            </thead>
+            <?php endif; ?>
+            <tbody>
+                <?php if( $field['value'] ): foreach( $field['value'] as $i => $value ): ?>
+
+            <tr class="<?php echo ( (string) $i == 'acfcloneindex') ? "row-clone" : "row"; ?>">
+
+                <?php
+
+                // row number
+
+                if( $field['row_limit'] > 1 ): ?>
+                    <td class="order"><?php echo $i+1; ?></td>
+                    <?php endif; ?>
+
+                <?php
+
+                // layout: Row
+
+                if( $field['layout'] == 'row' ): ?>
 			<td class="acf_input-wrap">
 				<table class="widefat acf_input">
 		<?php endif; ?>
-		
-		
-		<?php
-		
-		// loop though sub fields
-		
-		foreach( $field['sub_fields'] as $j => $sub_field ): ?>
-		
-			<?php
-		
-			// layout: Row
-			
-			if( $field['layout'] == 'row' ): ?>
+
+
+                <?php
+
+                // loop though sub fields
+
+                foreach( $field['sub_fields'] as $j => $sub_field ): ?>
+
+                    <?php
+
+                    // layout: Row
+
+                    if( $field['layout'] == 'row' ): ?>
 				<tr>
 					<td class="label">
-						<label><?php echo $sub_field['label']; ?></label>
-						<?php if( isset($sub_field['instructions']) ): ?>
-							<span class="sub-field-instructions"><?php echo $sub_field['instructions']; ?></span>
-						<?php endif; ?>
-					</td>
+                        <label><?php echo $sub_field['label']; ?></label>
+                        <?php if( isset($sub_field['instructions']) ): ?>
+                        <span class="sub-field-instructions"><?php echo $sub_field['instructions']; ?></span>
+                        <?php endif; ?>
+                    </td>
+                        <?php endif; ?>
+
+                    <td>
+                        <?php
+
+                        // add value
+                        $sub_field['value'] = isset($value[$sub_field['name']]) ? $value[$sub_field['name']] : '';
+
+                        // *********************
+                        // wdh : we are using the name/slug as key not the 'field_n' key
+                        // wdh : removed
+//                      $sub_field['name'] = $field['name'] . '[' . $i . '][' . $sub_field['key'] . ']';
+                        // wdh : added
+                        $sub_field['name'] = $field['name'] . '[' . $i . '][' . $sub_field['name'] . ']';
+                        // *********************
+
+                        // create field
+                        $this->parent->create_field($sub_field);
+
+                        ?>
+                    </td>
+
+                    <?php
+
+                    // layout: Row
+
+                    if( $field['layout'] == 'row' ): ?>
+				</tr>
 			<?php endif; ?>
-			
-			<td>
-				<?php
-				
-				// add value
-				$sub_field['value'] = isset($value[$sub_field['name']]) ? $value[$sub_field['name']] : '';
-					
-				// add name
-				$sub_field['name'] = $field['name'] . '[' . $count . '][' . $sub_field['key'] . ']';
-					
-				// create field
-				$this->parent->create_field($sub_field);
-				
-				?>
-			</td>
-			
-			<?php
-		
-			// layout: Row
-			
-			if( $field['layout'] == 'row' ): ?>
-				</tr>				
-			<?php endif; ?>
-			
-		<?php endforeach; ?>
-			
-		<?php
-		
-		// layout: Row
-		
-		if( $field['layout'] == 'row' ): ?>
+
+                    <?php endforeach; ?>
+
+                <?php
+
+                // layout: Row
+
+                if( $field['layout'] == 'row' ): ?>
 				</table>
 			</td>
 		<?php endif; ?>
-		
-		<?php 
-		
-		// delete row
-		
-		if( $field['row_min'] < $field['row_limit'] ): ?>
-			<td class="remove">
-				<a class="acf-button-add add-row-before" href="javascript:;"></a>
-				<a class="acf-button-remove" href="javascript:;"></a>
-			</td>
-		<?php endif; ?>
-		
-		</tr>
-	<?php $count++; endforeach; endif; ?>
-	</tbody>
-	</table>
-	<?php if( $field['row_min'] < $field['row_limit'] ): ?>
 
-	<ul class="hl clearfix repeater-footer">
-		<li class="right">
-			<a href="javascript:;" class="add-row-end acf-button"><?php echo $field['button_label']; ?></a>
-		</li>
-	</ul>
+                <?php
 
-	<?php endif; ?>	
-</div>
-<?php
-	}
-	
-	
-	
+                // delete row
+
+                if( $field['row_min'] < $field['row_limit'] ): ?>
+                    <td class="remove">
+                        <a class="acf-button-add add-row-before" href="javascript:;"></a>
+                        <a class="acf-button-remove" href="javascript:;"></a>
+                    </td>
+                    <?php endif; ?>
+
+            </tr>
+                <?php endforeach; endif; ?>
+            </tbody>
+        </table>
+        <?php if( $field['row_min'] < $field['row_limit'] ): ?>
+
+        <ul class="hl clearfix repeater-footer">
+            <li class="right">
+                <a href="javascript:;" class="add-row-end acf-button"><?php echo $field['button_label']; ?></a>
+            </li>
+        </ul>
+
+        <?php endif; ?>
+    </div>
+    <?php
+    }
+
+
+
 	/*--------------------------------------------------------------------------------------
 	*
 	*	create_options
@@ -601,15 +634,21 @@ class acf_Repeater extends acf_Field
 				
 				
 				// apply filters
-				$f = apply_filters('acf_save_field', $f );
+				$f = apply_filters('acf_save_field', $f );                      // ??? this has already been called yes - i mean we're in it now???
 				$f = apply_filters('acf_save_field-' . $f['type'], $f );
-				
-				
-				// add
-				$sub_fields[ $f['key'] ] = $f;
+
+                // ********************************
+                // ** important **
+                // wdh : save field via key = name not 'field_n' key
+                // wdh : removed
+//				$sub_fields[ $f['key'] ] = $f;
+                // wdh : added
+                $sub_fields[ $f['name'] ] = $f;
+                // ********************************
+
 			}
-			
-			
+
+
 			// update sub fields
 			$field['sub_fields'] = $sub_fields;
 		}
@@ -630,46 +669,46 @@ class acf_Repeater extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function update_value($post_id, $field, $value)
-	{
-		$total = 0;
-		
-		if($value)
-		{
-			// remove dummy field
-			unset($value['acfcloneindex']);
-			
-			$i = -1;
-			
-			// loop through rows
-			foreach($value as $row)
-			{	
-				$i++;
-				
-				// increase total
-				$total++;
-					
-				// loop through sub fields
-				foreach($field['sub_fields'] as $sub_field)
-				{
-					// get sub field data
-					$v = isset($row[$sub_field['key']]) ? $row[$sub_field['key']] : '';
-					
-					// add to parent value
-					//$parent_value[$i][$sub_field['name']] = $v;
-					
-					// update full name
-					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
-					
-					// save sub field value
-					$this->parent->update_value($post_id, $sub_field, $v);
-				}
-			}
-		}
-		
-		parent::update_value($post_id, $field, $total);
-		
-	}
+//	function update_value($post_id, $field, $value)
+//	{
+//		$total = 0;
+//
+//		if($value)
+//		{
+//			// remove dummy field
+//			unset($value['acfcloneindex']);
+//
+//			$i = -1;
+//
+//			// loop through rows
+//			foreach($value as $row)
+//			{
+//				$i++;
+//
+//				// increase total
+//				$total++;
+//
+//				// loop through sub fields
+//				foreach($field['sub_fields'] as $sub_field)
+//				{
+//					// get sub field data
+//					$v = isset($row[$sub_field['key']]) ? $row[$sub_field['key']] : '';
+//
+//					// add to parent value
+//					//$parent_value[$i][$sub_field['name']] = $v;
+//
+//					// update full name
+//					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
+//
+//					// save sub field value
+//					$this->parent->update_value($post_id, $sub_field, $v);
+//				}
+//			}
+//		}
+//
+//		parent::update_value($post_id, $field, $total);
+//
+//	}
 	
 	
 	/*--------------------------------------------------------------------------------------
@@ -681,39 +720,39 @@ class acf_Repeater extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function get_value($post_id, $field)
-	{
-		// vars
-		$values = array();
-		$total = 0;
-		
-		
-		// get total rows
-		$total = (int) parent::get_value($post_id, $field);
-		
-		
-		if($total > 0)
-		{
-			// loop through rows
-			for($i = 0; $i < $total; $i++)
-			{
-				// loop through sub fields
-				foreach($field['sub_fields'] as $sub_field)
-				{
-					// store name
-					$field_name = $sub_field['name'];
-					
-					// update full name
-					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $field_name;
-					
-					$values[$i][$field_name] = $this->parent->get_value($post_id, $sub_field);
-				}
-			}
-			
-		}
-		
-		return $values;
-	}
+//	function get_value($post_id, $field)
+//	{
+//		// vars
+//		$values = array();
+//		$total = 0;
+//
+//
+//		// get total rows
+//		$total = (int) parent::get_value($post_id, $field);
+//
+//
+//		if($total > 0)
+//		{
+//			// loop through rows
+//			for($i = 0; $i < $total; $i++)
+//			{
+//				// loop through sub fields
+//				foreach($field['sub_fields'] as $sub_field)
+//				{
+//					// store name
+//					$field_name = $sub_field['name'];
+//
+//					// update full name
+//					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $field_name;
+//
+//					$values[$i][$field_name] = $this->parent->get_value($post_id, $sub_field);
+//				}
+//			}
+//
+//		}
+//
+//		return $values;
+//	}
 	
 	/*--------------------------------------------------------------------------------------
 	*

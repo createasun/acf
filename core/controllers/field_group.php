@@ -161,17 +161,17 @@ class acf_field_group
 			acf.nonce = "' . wp_create_nonce( 'acf_nonce' ) . '";
 			acf.post_id = ' . $post->ID . ';
 		</script>';
-		
+
 		
 		do_action('acf_head-fields');
-		
-		
+
+
 		// add metaboxes
 		add_meta_box('acf_fields', __("Fields",'acf'), array($this, 'meta_box_fields'), 'acf', 'normal', 'high');
 		add_meta_box('acf_location', __("Location",'acf'), array($this, 'meta_box_location'), 'acf', 'normal', 'high');
 		add_meta_box('acf_options', __("Options",'acf'), array($this, 'meta_box_options'), 'acf', 'normal', 'high');
-		
-		
+
+
 		// add screen settings
 		add_filter('screen_settings', array($this, 'screen_settings'), 10, 1);
 	}
@@ -256,39 +256,39 @@ class acf_field_group
 			'post_id' => 0,
 			'nonce' => ''
 		);
-		
+
 		// load post options
 		$options = array_merge($options, $_POST);
-		
-		
+
+
 		// verify nonce
 		if( ! wp_verify_nonce($options['nonce'], 'acf_nonce') )
 		{
 			die(0);
 		}
-		
-		
-		
+
+
+
 		// required
 		if( ! $options['field_type'] )
 		{
 			die(0);
 		}
-		
-		
+
+
 		// find key (not actual field key, more the html attr name)
 		$options['field_key'] = str_replace("fields[", "", $options['field_key']);
 		$options['field_key'] = str_replace("][type]", "", $options['field_key']) ;
-		
-		
+
+
 
 		$field = array();
-		
+
 		// render options
 		$this->parent->fields[ $options['field_type'] ]->create_options($options['field_key'], $field);
-		
+
 		die();
-		
+
 	}
 	
 	
@@ -587,10 +587,18 @@ class acf_field_group
 		
 	function save_name($name)
 	{
-        if (isset($_POST['post_type']) && $_POST['post_type'] == 'acf') 
+        //******************************
+        //   wdh : removed
+        //   keep acf post name as is no conflict with page/post names theyre separate post types
+        //
+
+        if (isset($_POST['post_type']) && $_POST['post_type'] == 'acf')
         {
-			$name = 'acf_' . sanitize_title_with_dashes($_POST['post_title']);
+//			$name = 'acf_' . sanitize_title_with_dashes($_POST['post_title']);
+            $name = sanitize_title_with_dashes($_POST['post_title']);
         }
+
+        // ******************************
         
         return $name;
 	}
@@ -599,7 +607,7 @@ class acf_field_group
     /*--------------------------------------------------------------------------------------
     *  save_post
     *
-    *  @description: Saves the field / location / option data for a field group
+    *  @description: Saves the field / location / display-option data for a field group
     *  @author Elliot Condon / Wayne D Harris
     *  @since 1.0.0
     *  @created: 23/06/12
@@ -607,6 +615,10 @@ class acf_field_group
 
     function save_post($acf_post_id)
     {
+        global $post;
+
+//        phplog('field_group','$post->post_name=',$post->post_name);
+
 
         // only for save acf
         if( ! isset($_POST['acf_field_group']) || ! wp_verify_nonce($_POST['acf_field_group'], 'acf_field_group') )
@@ -638,6 +650,21 @@ class acf_field_group
         // wdh : added
         $fields = array();
 
+        // ********************************
+        // wdh : we want to replace the clone init 'field_n' keys with the field name/slug
+        // why? because we want to be able to drill down the array tree to find values via name
+        // - all field_groups are encapsulated saved as arrays now not individual postmeta
+
+//        foreach( $_POST['fields'] as $key => $field )
+//        {
+//            $field['key'] = $key;
+//
+//
+//        }
+
+        // ********************************
+
+
         if( $_POST['fields'] )
         {
             $i = -1;
@@ -667,13 +694,17 @@ class acf_field_group
                 // wdh : removed
 //              $this->parent->update_field( $acf_post_id, $field);
                 // wdh : added
+                // * important for sub-field saving ( repeater & flex content )
                 $field = $this->parent->apply_save_field_filters( $field );
 
-                $fields[$field['key']] = $field;
+                // ** important **
+                // wdh : save field via key = name not 'field_n' key
+                // wdh : removed
+//               $fields[$field['key']] = $field;
+                // wdh : added
+                $fields[$field['name']] = $field;
 
-                // ********************************
 
-                // ********************************
                 //  wdh : redundant
                 // add to dont delete array
 //                $dont_delete[] = $field['key'];
@@ -780,12 +811,14 @@ class acf_field_group
 
         $field_group_config                 = array();
         $field_group_config['id']           = $acf_post_id;
-        $field_group_config['name']         = $_POST['post_name'];  // wdh : new field added to $acf object
+        $field_group_config['name']         = sanitize_title( $_POST['post_title'] );    // wdh :  new field added to $acf object
         $field_group_config['title']        = $_POST['post_title'];
         $field_group_config['fields']       = $fields;
         $field_group_config['location']     = $location_config;
         $field_group_config['options']      = $options;
         $field_group_config['menu_order']   = $_POST['menu_order'];
+
+//        $_POST['post_name'] = sanitize_title( get_the_title() );
 
         // todo - add theme prefix
 
@@ -803,7 +836,7 @@ class acf_field_group
 //        phplog('field_group','$fields["field_38"]=',$fields["field_38"]);
 //        phplog('field_group','$fields["field_29"]=',$fields["field_29"]);
 //
-//       phplog('field_group','$field_group_config=',$field_group_config);
+//         phplog('field_group','$field_group_config=',$field_group_config);
 //
 //        phplog('field_group','$options=',$options);
 //        phplog('field_group','$check=',$check);
