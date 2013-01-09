@@ -12,7 +12,7 @@
 class acf_input
 {
 
-	var $parent,
+	var $acf,
 		$data;
 		
 	
@@ -24,11 +24,11 @@ class acf_input
 	*  @created: 23/06/12
 	*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
 	
 		// vars
-		$this->parent = $parent;
+		$this->acf = $acf;  //wdh changed from $parent - better naming
 		
 		
 		// actions
@@ -186,8 +186,10 @@ class acf_input
 		
 			
 		// get style for page
-		$metabox_ids = $this->parent->get_input_metabox_ids( array( 'post_id' => $post_id, 'post_type' => $typenow ), false);
-		$style = isset($metabox_ids[0]) ? $this->get_input_style($metabox_ids[0]) : '';
+		$show_field_group_ids = $this->acf->get_input_metabox_ids( array( 'post_id' => $post_id, 'post_type' => $typenow ), false);
+
+		$style = isset($show_field_group_ids[0]) ? $this->get_input_style($show_field_group_ids[0]) : '';
+
 		echo '<style type="text/css" id="acf_style" >' .$style . '</style>';
 		
 
@@ -204,46 +206,95 @@ class acf_input
 		
 		
 		// get acf's
-		$acfs = $this->parent->get_field_groups();
+		$field_groups = $this->acf->get_field_groups(); //wdh : changed '$acfs' to '$field_group' - better naming
 		
-		if($acfs)
+		if($field_groups)
 		{
-			foreach($acfs as $acf)
+			foreach($field_groups as $field_group)
 			{
 				// hide / show
-				$show = in_array($acf['id'], $metabox_ids) ? 1 : 0;
-				$priority = 'high';
-				if( $acf['options']['position'] == 'side' )
-				{
-					$priority = 'core';
-				}
-				
-				
-				// add meta box
-				add_meta_box(
-                    // wdh : use acf post_name as metabox id - there can be only one field group type per page
-                    $acf['name'],      //'acf_' . $acf['id'],
-					$acf['title'],                              //metabox title
-					array($this, 'meta_box_input'), 
-					$typenow, 
-					$acf['options']['position'], 
-					$priority, 
-					array(
-                        'field_group_post_id'   => $acf['id'],      // **** wdh: added
-                        'field_group_post_name' => $acf['name'],    // **** wdh: added
-                        'fields'                => $acf['fields'],
-                        'options'               => $acf['options'],
-                        'show'                  => $show,
-                        'post_id'               => $post->ID,
+				$show = in_array($field_group['id'], $show_field_group_ids) ? 1 : 0;
 
-                    )
-				);
+                $this->add_acf_meta_box( $field_group, $field_group['name'], $show );
+
+
+//				$priority = 'high';
+//				if( $field_group['options']['position'] == 'side' )
+//				{
+//					$priority = 'core';
+//				}
+//
+//
+//				// add meta box
+//				add_meta_box(
+//                    'acf_' .$field_group['name'],       //metabox id : wdh : removed 'acf_' . $field_group['id'],
+//                    // wdh : ** note: metabox id must start with 'acf_' for input-actions.js
+//					__( $field_group['title'], 'acf' ), //metabox title : wdh : added localisation
+//					array($this, 'meta_box_input'),
+//					$typenow,
+//					$field_group['options']['position'],
+//					$priority,
+//					array(
+//                        'field_group_post_id'   => $field_group['id'],      // **** wdh: added
+//                        'field_group_post_name' => $field_group['name'],    // **** wdh: added
+//                        'fields'                => $field_group['fields'],
+//                        'options'               => $field_group['options'],
+////                        'field_group_values_key'=> $field_group_values_key;
+//                        'show'                  => $show,
+//                        'post_id'               => $post->ID,
+//
+//                    )
+//				);
 				
 			}
-			// foreach($acfs as $acf)
+			// foreach($field_groups as $field_group)
 		}
-		// if($acfs)
+		// if($field_groups)
 	}
+    /*--------------------------------------------------------------------------------------
+    *  add_acf_meta_box
+    *
+    *  @description:
+    *  @since
+    *  @author: Wayne D Harris from Elliot Condon
+    *-------------------------------------------------------------------------------------*/
+    function add_acf_meta_box( $field_group, $field_group_values_key=null, $screen=null, $show=true )
+    {
+        global $post, $typenow;
+
+        // wdh : if no unique id for the field_group_values is set use the field_group_name which works for acf natively
+        if (!isset($field_group_values_key))
+        {
+            $field_group['name'];
+        }
+
+        if ( !isset($screen) )
+        {
+            $screen = $typenow;
+        }
+
+        $priority = ($field_group['options']['position']=='side') ? 'core' : 'high';
+
+        // add meta box
+        add_meta_box(
+            // wdh : ** note: metabox id must start with 'acf_' for input-actions.js
+            'acf_' .$field_group['name'],       //metabox id : wdh : removed 'acf_' . $field_group['id'],
+            __( $field_group['title'], 'acf' ), //metabox title : wdh : added localisation
+            array($this, 'meta_box_input'),
+            $screen,
+            $field_group['options']['position'],
+            $priority,
+            array(
+                'field_group_post_id'   => $field_group['id'],      // wdh: added
+                'field_group_post_name' => $field_group['name'],    // wdh: added
+                'fields'                => $field_group['fields'],
+                'options'               => $field_group['options'],
+                'field_group_values_key'=> $field_group_values_key, // wdh: added
+                'show'                  => $show,
+                'post_id'               => $post->ID,
+            )
+	    );
+    }
 
     /*--------------------------------------------------------------------------------------
     *  get_input_style
@@ -253,20 +304,20 @@ class acf_input
     *  @rewrite: 05/01/13 by wdh
     *  @author: Wayne D Harris / Elliot Condon
     *-------------------------------------------------------------------------------------*/
-    function get_input_style( $acf_id = false )
+    function get_input_style( $field_group_id = false )
 	{
         // vars
-        $acfs = $this->parent->get_field_groups();
+        $field_groups = $this->acf->get_field_groups();
         $html = "";
 
         // find acf
-		if($acfs)
+		if($field_groups)
 		{
-			foreach($acfs as $acf)
+			foreach($field_groups as $field_group)
 			{
-                if($acf['id'] != $acf_id) continue;
+                if($field_group['id'] != $field_group_id) continue;
 
-                $options_hide_array = $acf['options']['hide_on_screen'];
+                $options_hide_array = $field_group['options']['hide_on_screen'];
 
                 $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'the_content',      'postdivrich'       );
                 $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'excerpt',          'postexcerpt'       );
@@ -332,7 +383,8 @@ class acf_input
     /*--------------------------------------------------------------------------------------
     *  meta_box_input
     *
-    *  @description:
+    *
+    *  @description: add_acf_meta_box callback
     *  @since 1.0.0
     *  @created: 23/06/12
     *-------------------------------------------------------------------------------------*/
@@ -349,8 +401,7 @@ class acf_input
 			'post_id' => 0,
 		);
 		$options = array_merge( $options, $metabox['args'] );
-		
-		
+
 		// needs fields
 		if( $options['fields'] )
 		{
@@ -358,10 +409,10 @@ class acf_input
 
             // ***********************************
             // wdh : additional feature sent in $_POST via name/value pairs
-            // allow data from this metabox to be posted to a different post than its parent
+            // allow data from this metabox to be posted to a different post than its acf
 
-            // use the metabox id as the field_group_values_key
-            $field_group_values_key     = $metabox['id'];
+            $field_group_values_key = $options['field_group_values_key'];
+
             echo '<input type="hidden" name="field_group_values_target_post_id['.$field_group_values_key.']" value="'.$options['post_id'].'"/>';
 
             // save the field_group_post_name/id the metabox is using
@@ -375,13 +426,13 @@ class acf_input
 			if( $options['show'] )
 			{
                 // ***********************************
-                // wdh : additionally pass values
+                // wdh :  pass additional params
 
                 // wdh: removed
-//              $this->parent->render_fields_for_input( $options['fields'], $options['post_id'] );
+//              $this->acf->render_fields_for_input( $options['fields'], $options['post_id'] );
 
                 // wdh: added
-                $this->parent->render_fields_for_input( $options['fields'], $options['post_id'], $field_group_values_key, $options['field_group_post_id'] );
+                $this->acf->render_fields_for_input( $options['fields'], $options['post_id'], $field_group_values_key, $options['field_group_post_id'] );
 
                 // ***********************************
 			}
@@ -404,7 +455,7 @@ class acf_input
 
 	function ajax_acf_input()
 	{
-		
+
 		// defaults
 		$defaults = array(
 			'acf_id' => null,
@@ -420,17 +471,25 @@ class acf_input
 			echo "";
 			die();
 		}
-		
+
+        phplog('input.php','$options=',$options);
+
 		// get acfs
-		$acfs = $this->parent->get_field_groups();
-		if( $acfs )
+		$field_groups = $this->acf->get_field_groups();
+		if( $field_groups )
 		{
-			foreach( $acfs as $acf )
+			foreach( $field_groups as $field_group )
 			{
-				if( $acf['id'] == $options['acf_id'] )
+				if( $field_group['id'] == $options['acf_id'] )
 				{
-					$this->parent->render_fields_for_input( $acf['fields'], $options['post_id']);
-					
+                    //******************************
+                    // wdh : removed
+//					$this->acf->render_fields_for_input( $field_group['fields'], $options['post_id']);
+                    // wdh : added : todo test
+                    $this->acf->render_fields_for_input( $options['fields'], $options['post_id'], $options['field_group_values_key'], $options['field_group_post_id'] );
+
+                    //******************************
+
 					break;
 				}
 			}
@@ -441,92 +500,92 @@ class acf_input
 	}
 
 
-    /*--------------------------------------------------------------------------------------
-    *  save_post
-    *
-    *  @description: Saves the field / location / option data for a field group
-    *  @since 1.0.0
-    *  @created: 23/06/12
-    *-------------------------------------------------------------------------------------*/
-	
-	function save_post($post_id)
-	{	
-		
-		// do not save if this is an auto save routine
-		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return $post_id;
-		
-		
-		// only for save acf
-		if( ! isset($_POST['save_input']) || $_POST['save_input'] != 'true')
-		{
-			return $post_id;
-		}
-		
-		
-		// Save revision (copy and paste of current metadata. ie: what it was)
-		$parent_id = wp_is_post_revision( $post_id );
-		if( $parent_id )
-		{
-			$this->save_post_revision( $parent_id, $post_id );
+    /*
+	*  save_post
+	*
+	*  @description: Saves the field / location / option data for a field group
+	*  @since 1.0.0
+	*  @created: 23/06/12
+	*/
+
+    function save_post($post_id)
+    {
+
+        // do not save if this is an auto save routine
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return $post_id;
+
+
+        // only for save acf
+        if( ! isset($_POST['save_input']) || $_POST['save_input'] != 'true')
+        {
+            return $post_id;
+        }
+
+
+        // Save revision (copy and paste of current metadata. ie: what it was)
+        $parent_id = wp_is_post_revision( $post_id );
+        if( $parent_id )
+        {
+            $this->save_post_revision( $parent_id, $post_id );
         }
         else
         {
-	        do_action('acf_save_post', $post_id);
+            do_action('acf_save_post', $post_id);
         }
-        
-	}
+
+    }
 
 
-    /*--------------------------------------------------------------------------------------
-    *  save_post_revision
-    *
-    *  @description: simple copy and paste of fields
-    *  @since 3.4.4
-    *  @created: 4/09/12
-    *-------------------------------------------------------------------------------------*/
-	
-	function save_post_revision( $parent_id, $revision_id )
-	{
+    /*
+	*  save_post_revision
+	*
+	*  @description: simple copy and paste of fields
+	*  @since 3.4.4
+	*  @created: 4/09/12
+	*/
 
-		// load from post
-		if( !isset($_POST['fields']) )
-		{
-			return false;
-		}
-		
-		
-		// field data was posted. Find all values (not references) and copy / paste them over.
-		
-		global $wpdb;
-		
-		
-		// get field from postmeta
-		$rows = $wpdb->get_results( $wpdb->prepare(
-			"SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id = %d AND meta_key NOT LIKE %s", 
-			$parent_id, 
-			'\_%'
-		), ARRAY_A);
-		
-		
-		if( $rows )
-		{
-			foreach( $rows as $row )
-			{
-				$wpdb->insert( 
-					$wpdb->postmeta, 
-					array(
-						'post_id' => $revision_id,
-						'meta_key' => $row['meta_key'],
-						'meta_value' => $row['meta_value']
-					)
-				);
-			}
-		}
-		
-		return true;
-	}
-	
-		
+    function save_post_revision( $parent_id, $revision_id )
+    {
+
+        // load from post
+        if( !isset($_POST['fields']) )
+        {
+            return false;
+        }
+
+
+        // field data was posted. Find all values (not references) and copy / paste them over.
+
+        global $wpdb;
+
+
+        // get field from postmeta
+        $rows = $wpdb->get_results( $wpdb->prepare(
+            "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id = %d AND meta_key NOT LIKE %s",
+            $parent_id,
+            '\_%'
+        ), ARRAY_A);
+
+
+        if( $rows )
+        {
+            foreach( $rows as $row )
+            {
+                $wpdb->insert(
+                    $wpdb->postmeta,
+                    array(
+                        'post_id' => $revision_id,
+                        'meta_key' => $row['meta_key'],
+                        'meta_value' => $row['meta_value']
+                    )
+                );
+            }
+        }
+
+        return true;
+    }
+
+
 	
 	/*--------------------------------------------------------------------------------------
 	*
@@ -561,7 +620,7 @@ acf.text.gallery_tb_title_edit = "<?php _e("Edit Image",'acf'); ?>";
 </script>
 		<?php
 		
-		foreach($this->parent->fields as $field)
+		foreach($this->acf->fields as $field)
 		{
 			$field->admin_head();
 		}
@@ -592,7 +651,7 @@ acf.text.gallery_tb_title_edit = "<?php _e("Edit Image",'acf'); ?>";
 		));
 
 		
-		foreach($this->parent->fields as $field)
+		foreach($this->acf->fields as $field)
 		{
 			$field->admin_print_scripts();
 		}
@@ -618,7 +677,7 @@ acf.text.gallery_tb_title_edit = "<?php _e("Edit Image",'acf'); ?>";
 			'acf-datepicker',	
 		));
 		
-		foreach($this->parent->fields as $field)
+		foreach($this->acf->fields as $field)
 		{
 			$field->admin_print_styles();
 		}
@@ -838,70 +897,70 @@ html.wp-toolbar {
     *  @created: 23/06/12
     */
 
-//    function get_input_style($acf_id = false)
+//    function get_input_style($field_group_id = false)
 //    {
 //        // vars
-//        $acfs = $this->parent->get_field_groups();
+//        $field_groups = $this->parent->get_field_groups();
 //        $html = "";
 //
 //        // find acf
-//        if($acfs)
+//        if($field_groups)
 //        {
-//            foreach($acfs as $acf)
+//            foreach($field_groups as $field_group)
 //            {
-//                if($acf['id'] != $acf_id) continue;
+//                if($field_group['id'] != $field_group_id) continue;
 //
 //
 //                // add style to html
-//                if( in_array('the_content',$acf['options']['hide_on_screen']) )
+//                if( in_array('the_content',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#postdivrich {display: none;} ';
 //                }
-//                if( in_array('excerpt',$acf['options']['hide_on_screen']) )
+//                if( in_array('excerpt',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#postexcerpt, #screen-meta label[for=postexcerpt-hide] {display: none;} ';
 //                }
-//                if( in_array('custom_fields',$acf['options']['hide_on_screen']) )
+//                if( in_array('custom_fields',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#postcustom, #screen-meta label[for=postcustom-hide] { display: none; } ';
 //                }
-//                if( in_array('discussion',$acf['options']['hide_on_screen']) )
+//                if( in_array('discussion',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#commentstatusdiv, #screen-meta label[for=commentstatusdiv-hide] {display: none;} ';
 //                }
-//                if( in_array('comments',$acf['options']['hide_on_screen']) )
+//                if( in_array('comments',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#commentsdiv, #screen-meta label[for=commentsdiv-hide] {display: none;} ';
 //                }
-//                if( in_array('slug',$acf['options']['hide_on_screen']) )
+//                if( in_array('slug',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#slugdiv, #screen-meta label[for=slugdiv-hide] {display: none;} ';
 //                }
-//                if( in_array('author',$acf['options']['hide_on_screen']) )
+//                if( in_array('author',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#authordiv, #screen-meta label[for=authordiv-hide] {display: none;} ';
 //                }
-//                if( in_array('format',$acf['options']['hide_on_screen']) )
+//                if( in_array('format',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#formatdiv, #screen-meta label[for=formatdiv-hide] {display: none;} ';
 //                }
-//                if( in_array('featured_image',$acf['options']['hide_on_screen']) )
+//                if( in_array('featured_image',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#postimagediv, #screen-meta label[for=postimagediv-hide] {display: none;} ';
 //                }
-//                if( in_array('revisions',$acf['options']['hide_on_screen']) )
+//                if( in_array('revisions',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#revisionsdiv, #screen-meta label[for=revisionsdiv-hide] {display: none;} ';
 //                }
-//                if( in_array('categories',$acf['options']['hide_on_screen']) )
+//                if( in_array('categories',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#categorydiv, #screen-meta label[for=categorydiv-hide] {display: none;} ';
 //                }
-//                if( in_array('tags',$acf['options']['hide_on_screen']) )
+//                if( in_array('tags',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#tagsdiv-post_tag, #screen-meta label[for=tagsdiv-post_tag-hide] {display: none;} ';
 //                }
-//                if( in_array('send-trackbacks',$acf['options']['hide_on_screen']) )
+//                if( in_array('send-trackbacks',$field_group['options']['hide_on_screen']) )
 //                {
 //                    $html .= '#trackbacksdiv, #screen-meta label[for=trackbacksdiv-hide] {display: none;} ';
 //                }
@@ -910,9 +969,9 @@ html.wp-toolbar {
 //                break;
 //
 //            }
-//            // foreach($acfs as $acf)
+//            // foreach($field_groups as $field_group)
 //        }
-//        //if($acfs)
+//        //if($field_groups)
 //
 //        return $html;
 //    }

@@ -69,7 +69,12 @@ class Acf
 
         // ********************************
         //  wdh
-        $this->theme_prefix = $theme_prefix;
+//        $this->theme_prefix = $theme_prefix;
+
+        define( 'ACF_THEME_PREFIX',         $theme_prefix );
+        define( 'ACF_THEME_PREFIX_OPTIONS', $theme_prefix.'_options' );
+
+
         // ********************************
 		
 		// set text domain
@@ -797,7 +802,8 @@ class Acf
 			
 			//**********************************
             // todo : do we wish to add prefix here ??
-			$field['id'] = 'acf-' . $id;
+
+			$field['id'] = 'acf-' . $id . '-field';  //wdh : added '-field' suffix
 
 
             //**********************************

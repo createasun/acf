@@ -623,27 +623,27 @@ class acf_Repeater extends acf_Field
 			$sub_fields = array();
 			
 			
-			foreach( $field['sub_fields'] as $key => $f )
+			foreach( $field['sub_fields'] as $key => $sub_field )   // wdh : changed $f to $sub_field
 			{
 				$i++;
 				
 				
 				// order
-				$f['order_no'] = $i;
-				$f['key'] = $key;
+				$sub_field['order_no'] = $i;
+				$sub_field['key'] = $key;
 				
 				
 				// apply filters
-				$f = apply_filters('acf_save_field', $f );                      // ??? this has already been called yes - i mean we're in it now???
-				$f = apply_filters('acf_save_field-' . $f['type'], $f );
+				$sub_field = apply_filters('acf_save_field', $sub_field );
+				$sub_field = apply_filters('acf_save_field-' . $sub_field['type'], $sub_field );
 
                 // ********************************
                 // ** important **
                 // wdh : save field via key = name not 'field_n' key
                 // wdh : removed
-//				$sub_fields[ $f['key'] ] = $f;
+//				$sub_fields[ $sub_field['key'] ] = $sub_field;
                 // wdh : added
-                $sub_fields[ $f['name'] ] = $f;
+                $sub_fields[ $sub_field['name'] ] = $sub_field;
                 // ********************************
 
 			}

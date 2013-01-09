@@ -24,7 +24,7 @@ var acf = {
 	{
 		return $(this).length>0;
 	};
-	
+
 	
 	/*
 	*  Sortable Helper
