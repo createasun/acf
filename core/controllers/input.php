@@ -215,7 +215,7 @@ class acf_input
 				// hide / show
 				$show = in_array($field_group['id'], $show_field_group_ids) ? 1 : 0;
 
-                $this->add_acf_meta_box( $field_group, $field_group['name'], $show );
+                $this->add_acf_meta_box( $field_group, $field_group['name'], $typenow, $show );
 
 
 //				$priority = 'high';

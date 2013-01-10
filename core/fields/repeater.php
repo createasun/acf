@@ -22,7 +22,7 @@ class acf_Repeater extends acf_Field
 		
 		
 		// filters
-		add_filter('acf_save_field-' . $this->name, array($this, 'acf_save_field'));
+		add_filter('acf_save_field-repeater', array($this, 'acf_save_field'));
    	}
 
     /**
@@ -135,21 +135,21 @@ class acf_Repeater extends acf_Field
         }
 
         // *********************
-        // wdh : added : replace unique keys set in input-actions.js/repeater_add_field() with integer indexes
-        // todo : change order with new index ??
-        if( $field['value'] )
-        {
-            $keys   = array_keys( $field['value'] );
-            $values = array_values( $field['value'] );
-
-            for ( $k=0; $k < count($field['value']); $k++ )
-            {
-                $keys[$k] = ( (string)$keys[$k] == 'acfcloneindex' ) ? 'acfcloneindex' : $k;
-            }
-
-            $field['value'] = array_combine($keys, $values);
-
-        }
+//        // wdh : added : replace unique keys set in input-actions.js/repeater_add_field() with integer indexes
+//        // todo : change order with new index ??
+//        if( $field['value'] )
+//        {
+//            $keys   = array_keys( $field['value'] );
+//            $values = array_values( $field['value'] );
+//
+//            for ( $k=0; $k < count($field['value']); $k++ )
+//            {
+//                $keys[$k] = ( (string)$keys[$k] == 'acfcloneindex' ) ? 'acfcloneindex' : $k;
+//            }
+//
+//            $field['value'] = array_combine($keys, $values);
+//
+//        }
         // *********************
 
         ?>
@@ -245,11 +245,13 @@ class acf_Repeater extends acf_Field
                         $sub_field['value'] = isset($value[$sub_field['name']]) ? $value[$sub_field['name']] : '';
 
                         // *********************
+                        // ** setting the $sub_field['name'] here in effect creates the structure of the values array ie the $_POST array **
                         // wdh : we are using the name/slug as key not the 'field_n' key
                         // wdh : removed
 //                      $sub_field['name'] = $field['name'] . '[' . $i . '][' . $sub_field['key'] . ']';
                         // wdh : added
                         $sub_field['name'] = $field['name'] . '[' . $i . '][' . $sub_field['name'] . ']';
+
                         // *********************
 
                         // create field
@@ -611,6 +613,8 @@ class acf_Repeater extends acf_Field
 	
 	function acf_save_field($field)
 	{
+//        phplog('repeater.php','$field=',$field );
+
 		// format sub_fields
 		if( $field['sub_fields'] )
 		{
@@ -658,8 +662,22 @@ class acf_Repeater extends acf_Field
 		return $field;
 
 	}
-	
-	
+
+    /*--------------------------------------------------------------------------------------
+    *
+    *	pre_save_field
+    *	- called just before saving the field to the database.
+    *
+    *	@author Elliot Condon
+    *	@since 2.2.0
+    *
+    *-------------------------------------------------------------------------------------*/
+
+    function acf_update_value($value)
+    {
+
+
+    }
 	/*--------------------------------------------------------------------------------------
 	*
 	*	update_value
@@ -669,46 +687,46 @@ class acf_Repeater extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-//	function update_value($post_id, $field, $value)
-//	{
-//		$total = 0;
-//
-//		if($value)
-//		{
-//			// remove dummy field
-//			unset($value['acfcloneindex']);
-//
-//			$i = -1;
-//
-//			// loop through rows
-//			foreach($value as $row)
-//			{
-//				$i++;
-//
-//				// increase total
-//				$total++;
-//
-//				// loop through sub fields
-//				foreach($field['sub_fields'] as $sub_field)
-//				{
-//					// get sub field data
-//					$v = isset($row[$sub_field['key']]) ? $row[$sub_field['key']] : '';
-//
-//					// add to parent value
-//					//$parent_value[$i][$sub_field['name']] = $v;
-//
-//					// update full name
-//					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
-//
-//					// save sub field value
-//					$this->parent->update_value($post_id, $sub_field, $v);
-//				}
-//			}
-//		}
-//
-//		parent::update_value($post_id, $field, $total);
-//
-//	}
+	function update_value($post_id, $field, $value)
+	{
+		$total = 0;
+
+		if($value)
+		{
+			// remove dummy field
+			unset($value['acfcloneindex']);
+
+			$i = -1;
+
+			// loop through rows
+			foreach($value as $row)
+			{
+				$i++;
+
+				// increase total
+				$total++;
+
+				// loop through sub fields
+				foreach($field['sub_fields'] as $sub_field)
+				{
+					// get sub field data
+					$v = isset($row[$sub_field['key']]) ? $row[$sub_field['key']] : '';
+
+					// add to parent value
+					//$parent_value[$i][$sub_field['name']] = $v;
+
+					// update full name
+					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
+
+					// save sub field value
+					$this->parent->update_value($post_id, $sub_field, $v);
+				}
+			}
+		}
+
+		parent::update_value($post_id, $field, $total);
+
+	}
 	
 	
 	/*--------------------------------------------------------------------------------------

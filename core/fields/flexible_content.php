@@ -641,53 +641,53 @@ class acf_Flexible_content extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-//	function update_value($post_id, $field, $value)
-//	{
-//		$sub_fields = array();
-//
-//		foreach($field['layouts'] as $layout)
-//		{
-//			foreach($layout['sub_fields'] as $sub_field)
-//			{
-//				$sub_fields[$sub_field['key']] = $sub_field;
-//			}
-//		}
-//
-//		$total = array();
-//
-//		if($value)
-//		{
-//			// remove dummy field
-//			unset($value['acfcloneindex']);
-//
-//			$i = -1;
-//
-//			// loop through rows
-//			foreach($value as $row)
-//			{
-//				$i++;
-//
-//				// increase total
-//				$total[] = $row['acf_fc_layout'];
-//				unset($row['acf_fc_layout']);
-//
-//				// loop through sub fields
-//				foreach($row as $field_key => $value)
-//				{
-//					$sub_field = $sub_fields[$field_key];
-//
-//					// update full name
-//					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
-//
-//					// save sub field value
-//					$this->parent->update_value($post_id, $sub_field, $value);
-//				}
-//			}
-//		}
-//
-//		parent::update_value($post_id, $field, $total);
-//
-//	}
+	function update_value($post_id, $field, $value)
+	{
+		$sub_fields = array();
+
+		foreach($field['layouts'] as $layout)
+		{
+			foreach($layout['sub_fields'] as $sub_field)
+			{
+				$sub_fields[$sub_field['key']] = $sub_field;
+			}
+		}
+
+		$total = array();
+
+		if($value)
+		{
+			// remove dummy field
+			unset($value['acfcloneindex']);
+
+			$i = -1;
+
+			// loop through rows
+			foreach($value as $row)
+			{
+				$i++;
+
+				// increase total
+				$total[] = $row['acf_fc_layout'];
+				unset($row['acf_fc_layout']);
+
+				// loop through sub fields
+				foreach($row as $field_key => $value)
+				{
+					$sub_field = $sub_fields[$field_key];
+
+					// update full name
+					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
+
+					// save sub field value
+					$this->parent->update_value($post_id, $sub_field, $value);
+				}
+			}
+		}
+
+		parent::update_value($post_id, $field, $total);
+
+	}
 	
 	
 	/*--------------------------------------------------------------------------------------

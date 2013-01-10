@@ -106,6 +106,8 @@ class acf_Field
 	*
 	*	@author Elliot Condon
 	*	@since 2.2.0
+	 *
+	 * wdh : redundant
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
@@ -133,13 +135,6 @@ class acf_Field
 		// if $post_id is a string, then it is used in the everything fields and can be found in the options table
 		if( is_numeric($post_id) )
 		{
-//            phplog('acf_field.php','$post_id=',$post_id );
-//            phplog('acf_field.php','$field=',$field );
-//            phplog('acf_field.php','$value=',$value );
-//            phplog('acf_field.php','$field[name]=',$field['name'] );
-
-
-
             update_post_meta($post_id, $field['name'], $value);
 			update_post_meta($post_id, '_' . $field['name'], $field['key']);
 		}
@@ -169,6 +164,8 @@ class acf_Field
 	*
 	*	@author Elliot Condon
 	*	@since 2.2.0
+	 *
+	 * wdh : redundant
 	* 
 	*-------------------------------------------------------------------------------------*/
 	

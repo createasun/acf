@@ -687,7 +687,7 @@ class Acf
 // 		return null;
 //	}
 	
-	
+	// todo : do we want/need this ??????????
 	/*
 	*  acf_load_field
 	*
@@ -729,8 +729,8 @@ class Acf
 		
 		return $field;
 	}
-	
-	
+
+    // todo : do we want/need this ??????????
 	/*
 	*  acf_parse_value
 	*
@@ -800,13 +800,8 @@ class Acf
 			$id = str_replace('[', '-', $id); // location rules (select) does'nt have "fields[" in it
 			$id = str_replace(']', '', $id);
 			
-			//**********************************
-            // todo : do we wish to add prefix here ??
+			$field['id'] = 'acf-field-'. $id;  //wdh : added '-field-' part of prefix
 
-			$field['id'] = 'acf-' . $id . '-field';  //wdh : added '-field' suffix
-
-
-            //**********************************
 		}
 		
 		
@@ -984,17 +979,17 @@ class Acf
 	
 	function get_value($post_id, $field)
 	{
-		if( empty($this->fields) )
-		{
-			$this->setup_fields();
-		}
-
-		if( !isset($field['type'], $this->fields[ $field['type'] ]) )
-		{
-			return false;
-		}
-
-		return $this->fields[$field['type']]->get_value($post_id, $field);
+//		if( empty($this->fields) )
+//		{
+//			$this->setup_fields();
+//		}
+//
+//		if( !isset($field['type'], $this->fields[ $field['type'] ]) )
+//		{
+//			return false;
+//		}
+//
+//		return $this->fields[$field['type']]->get_value($post_id, $field);
 	}
 	
 	
@@ -1036,10 +1031,10 @@ class Acf
 	
 	function update_value($post_id, $field, $value)
 	{
-		if( isset($field['type'], $this->fields[ $field['type'] ]) )
-		{
-			$this->fields[$field['type']]->update_value($post_id, $field, $value);
-		}
+//		if( isset($field['type'], $this->fields[ $field['type'] ]) )
+//		{
+//			$this->fields[$field['type']]->update_value($post_id, $field, $value);
+//		}
 	}
 	
 	
@@ -1057,13 +1052,13 @@ class Acf
 	
 	function update_field($post_id, $field)
 	{
-		// apply filters
-		$field = apply_filters('acf_save_field', $field );
-		$field = apply_filters('acf_save_field-' . $field['type'], $field );
-		
-		
-		// save
-		update_post_meta($post_id, $field['key'], $field);
+//		// apply filters
+//		$field = apply_filters('acf_save_field', $field );
+//		$field = apply_filters('acf_save_field-' . $field['type'], $field );
+//
+//
+//		// save
+//		update_post_meta($post_id, $field['key'], $field);
 	}
 	
 	
@@ -1157,6 +1152,7 @@ class Acf
 	*
 	*	get_input_metabox_ids
 	*	- called by function.fields to hide / show metaboxes
+	*   wdh : unfortunate naming..  get_field_group_ids_to_show would be better
 	*	
 	*	@author Elliot Condon
 	*	@since 2.0.5
@@ -1289,6 +1285,11 @@ class Acf
 	*
 	*	match_location_rule
 	*
+	*   todo : tighten up ??
+    *   wdh : could tighten up code here.. save 18 lines for 1 per go
+	*   eg.
+    *   return ( ($rule['operator'] == "==") && ($posts_page == $page) ) || ( ($rule['operator'] == "!=") && ($posts_page != $page) );
+	*
 	*	@author Elliot Condon
 	*	@since 2.0.0
 	* 
@@ -1408,10 +1409,6 @@ class Acf
 		        {
 			        $posts_page = (int) get_option('page_for_posts');
 
-                    // todo : tighten up ??
-
-                    // wdh : replace with..
-//                  return ( ($rule['operator'] == "==") && ($posts_page == $page) ) || ( ($rule['operator'] == "!=") && ($posts_page != $page) );
 
 			        if( $rule['operator'] == "==" )
 			        {

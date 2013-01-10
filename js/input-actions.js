@@ -1272,7 +1272,7 @@ var acf = {
 		
 	
 		// create and add the new field
-		var new_id = uniqid(),
+		var new_id = row_count + 1,//uniqid(), wdh changed
 			new_field_html = repeater.find('> table > tbody > tr.row-clone').html().replace(/(=["]*[\w-\[\]]*?)(acfcloneindex)/g, '$1' + new_id),
 			new_field = $('<tr class="row"></tr>').append( new_field_html );
 		
