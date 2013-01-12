@@ -278,7 +278,7 @@ class acf_input
         // add meta box
         add_meta_box(
             // wdh : ** note: metabox id must start with 'acf_' for input-actions.js
-            'acf_' .$field_group['name'],       //metabox id : wdh : removed 'acf_' . $field_group['id'],
+            'acf_'.$field_group['name'],       //metabox id : wdh : replaced 'acf_'.$field_group['id'],
             __( $field_group['title'], 'acf' ), //metabox title : wdh : added localisation
             array($this, 'meta_box_input'),
             $screen,

@@ -13,9 +13,9 @@ class acf_File extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-    	parent::__construct($parent);
+    	parent::__construct($acf);
     	
     	$this->name = 'file';
 		$this->title = __('File','acf');
@@ -201,7 +201,7 @@ class acf_File extends acf_Field
 			</td>
 			<td>
 				<?php 
-				$this->parent->create_field(array(
+				$this->acf->create_field(array(
 					'type'	=>	'radio',
 					'name'	=>	'fields['.$key.'][save_format]',
 					'value'	=>	$field['save_format'],

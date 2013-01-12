@@ -13,9 +13,9 @@ class acf_Color_picker extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-    	parent::__construct($parent);
+    	parent::__construct($acf);
     	
     	$this->name = 'color_picker';
 		$this->title = __("Color Picker",'acf');
@@ -69,7 +69,7 @@ class acf_Color_picker extends acf_Field
 			</td>
 			<td>
 				<?php 
-				$this->parent->create_field(array(
+				$this->acf->create_field(array(
 					'type'	=>	'text',
 					'name'	=>	'fields['.$key.'][default_value]',
 					'value'	=>	$field['default_value'],

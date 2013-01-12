@@ -13,9 +13,9 @@ class acf_Relationship extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-    	parent::__construct($parent);
+    	parent::__construct($acf);
     	
     	$this->name = 'relationship';
 		$this->title = __("Relationship",'acf');
@@ -108,7 +108,7 @@ class acf_Relationship extends acf_Field
 		// load all post types by default
 		if( !$options['post_type'] || !is_array($options['post_type']) || $options['post_type'][0] == "" )
 		{
-			$options['post_type'] = $this->parent->get_post_types();
+			$options['post_type'] = $this->acf->get_post_types();
 		}
 		
 		
@@ -272,7 +272,7 @@ class acf_Relationship extends acf_Field
 		// load all post types by default
 		if( !$field['post_type'] || !is_array($field['post_type']) || $field['post_type'][0] == "" )
 		{
-			$field['post_type'] = $this->parent->get_post_types();
+			$field['post_type'] = $this->acf->get_post_types();
 		}
 		
 		
@@ -429,14 +429,14 @@ class acf_Relationship extends acf_Field
 					''	=>	__("All",'acf')
 				);
 				
-				$post_types = $this->parent->get_post_types();
+				$post_types = $this->acf->get_post_types();
 				
 				foreach( $post_types as $post_type )
 				{
 					$choices[$post_type] = $post_type;
 				}
 				
-				$this->parent->create_field(array(
+				$this->acf->create_field(array(
 					'type'	=>	'select',
 					'name'	=>	'fields['.$key.'][post_type]',
 					'value'	=>	$field['post_type'],
@@ -458,8 +458,8 @@ class acf_Relationship extends acf_Field
 						'all' => __("All",'acf')
 					)
 				);
-				$choices = array_merge($choices, $this->parent->get_taxonomies_for_select());
-				$this->parent->create_field(array(
+				$choices = array_merge($choices, $this->acf->get_taxonomies_for_select());
+				$this->acf->create_field(array(
 					'type'	=>	'select',
 					'name'	=>	'fields['.$key.'][taxonomy]',
 					'value'	=>	$field['taxonomy'],
@@ -476,7 +476,7 @@ class acf_Relationship extends acf_Field
 			</td>
 			<td>
 				<?php 
-				$this->parent->create_field(array(
+				$this->acf->create_field(array(
 					'type'	=>	'text',
 					'name'	=>	'fields['.$key.'][max]',
 					'value'	=>	$field['max'],
@@ -522,7 +522,7 @@ class acf_Relationship extends acf_Field
         $posts = get_posts(array(
             'numberposts' => -1,
             'post__in' => $value,
-            'post_type'	=>	$this->parent->get_post_types(),
+            'post_type'	=>	$this->acf->get_post_types(),
             'post_status' => array('publish', 'private', 'draft', 'inherit', 'future'),
         ));
 
@@ -586,7 +586,7 @@ class acf_Relationship extends acf_Field
 //		$posts = get_posts(array(
 //			'numberposts' => -1,
 //			'post__in' => $value,
-//			'post_type'	=>	$this->parent->get_post_types(),
+//			'post_type'	=>	$this->acf->get_post_types(),
 //			'post_status' => array('publish', 'private', 'draft', 'inherit', 'future'),
 //		));
 //

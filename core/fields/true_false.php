@@ -13,9 +13,9 @@ class acf_True_false extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-    	parent::__construct($parent);
+    	parent::__construct($acf);
     	
     	$this->name = 'true_false';
 		$this->title = __("True / False",'acf');
@@ -70,7 +70,7 @@ class acf_True_false extends acf_Field
 			</td>
 			<td>
 				<?php 
-				$this->parent->create_field(array(
+				$this->acf->create_field(array(
 					'type'	=>	'text',
 					'name'	=>	'fields['.$key.'][message]',
 					'value'	=>	$field['message'],

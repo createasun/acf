@@ -797,7 +797,7 @@ class Acf
 			$id = $field['name'];
             $id = str_replace('fields[', '', $id);
 			$id = str_replace('][', '_', $id);
-			$id = str_replace('[', '-', $id); // location rules (select) does'nt have "fields[" in it
+			$id = str_replace('[', '-', $id); // location rules (select) doesn't have "fields[" in it
 			$id = str_replace(']', '', $id);
 			
 			$field['id'] = 'acf-field-'. $id;  //wdh : added '-field-' part of prefix

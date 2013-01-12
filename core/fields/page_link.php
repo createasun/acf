@@ -13,9 +13,9 @@ class acf_Page_link extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-    	parent::__construct($parent);
+    	parent::__construct($acf);
     	
     	$this->name = 'page_link';
 		$this->title = __('Page Link','acf');
@@ -38,7 +38,7 @@ class acf_Page_link extends acf_Field
 		// let post_object create the field
 		$field['type'] = 'post_object';
 		
-		$this->parent->create_field( $field );
+		$this->acf->create_field( $field );
 
 	}
 	
@@ -76,9 +76,9 @@ class acf_Page_link extends acf_Field
 					''	=>	__("All",'acf')
 				);
 				
-				$choices = $this->parent->get_post_types();
+				$choices = $this->acf->get_post_types();
 				
-				$this->parent->create_field(array(
+				$this->acf->create_field(array(
 					'type'	=>	'select',
 					'name'	=>	'fields['.$key.'][post_type]',
 					'value'	=>	$field['post_type'],
@@ -94,7 +94,7 @@ class acf_Page_link extends acf_Field
 			</td>
 			<td>
 				<?php 
-				$this->parent->create_field(array(
+				$this->acf->create_field(array(
 					'type'	=>	'radio',
 					'name'	=>	'fields['.$key.'][allow_null]',
 					'value'	=>	$field['allow_null'],
@@ -113,7 +113,7 @@ class acf_Page_link extends acf_Field
 			</td>
 			<td>
 				<?php 
-				$this->parent->create_field(array(
+				$this->acf->create_field(array(
 					'type'	=>	'radio',
 					'name'	=>	'fields['.$key.'][multiple]',
 					'value'	=>	$field['multiple'],

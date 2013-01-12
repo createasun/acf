@@ -13,9 +13,9 @@ class acf_Textarea extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-    	parent::__construct($parent);
+    	parent::__construct($acf);
     	
     	$this->name = 'textarea';
 		$this->title = __("Text Area",'acf');
@@ -65,7 +65,7 @@ class acf_Textarea extends acf_Field
 			</td>
 			<td>
 				<?php 
-				$this->parent->create_field(array(
+				$this->acf->create_field(array(
 					'type'	=>	'textarea',
 					'name'	=>	'fields['.$key.'][default_value]',
 					'value'	=>	$field['default_value'],
@@ -80,7 +80,7 @@ class acf_Textarea extends acf_Field
 			</td>
 			<td>
 				<?php 
-				$this->parent->create_field(array(
+				$this->acf->create_field(array(
 					'type'	=>	'select',
 					'name'	=>	'fields['.$key.'][formatting]',
 					'value'	=>	$field['formatting'],

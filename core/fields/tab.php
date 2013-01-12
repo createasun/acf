@@ -13,9 +13,9 @@ class acf_Tab extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-    	parent::__construct($parent);
+    	parent::__construct($acf);
     	
     	$this->name = 'tab';
 		$this->title = __("Tab",'acf');

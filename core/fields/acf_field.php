@@ -11,22 +11,22 @@ class acf_Field
 {
 	var $name;
 	var $title;
-	var $parent;
+	var $acf;
 	
 	
 	/*--------------------------------------------------------------------------------------
 	*
 	*	Constructor
-	*	- $parent is passed buy reference so you can play with the acf functions
+	*	- $acf is passed buy reference so you can play with the acf functions
 	*
 	*	@author Elliot Condon
 	*	@since 2.2.0
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-		$this->parent = $parent;
+		$this->acf = $acf;
 	}
 
 

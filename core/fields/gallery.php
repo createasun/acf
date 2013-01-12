@@ -17,9 +17,9 @@ class acf_Gallery extends acf_Field
 	*  @created: 5/07/12
 	*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-    	parent::__construct($parent);
+    	parent::__construct($acf);
     	
     	$this->name = 'gallery';
 		$this->title = __("Gallery",'acf');
@@ -120,9 +120,9 @@ class acf_Gallery extends acf_Field
 	<td>
 		<?php
 		
-		$image_sizes = $this->parent->get_all_image_sizes();
+		$image_sizes = $this->acf->get_all_image_sizes();
 		
-		$this->parent->create_field(array(
+		$this->acf->create_field(array(
 			'type'		=>	'radio',
 			'name'		=>	'fields['.$key.'][preview_size]',
 			'value'		=>	$field['preview_size'],

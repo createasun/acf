@@ -6,16 +6,16 @@ class acf_Flexible_content extends acf_Field
 	/*--------------------------------------------------------------------------------------
 	*
 	*	Constructor
-	*	- $parent is passed buy reference so you can play with the acf functions
+	*	- $acf is passed buy reference so you can play with the acf functions
 	*
 	*	@author Elliot Condon
 	*	@since 2.2.0
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-    	parent::__construct($parent);
+    	parent::__construct($acf);
     	
     	$this->name = 'flexible_content';
 		$this->title = __("Flexible Content",'acf');
@@ -138,7 +138,7 @@ class acf_Flexible_content extends acf_Field
                                     // *********************
 									
 									// create field
-									$this->parent->create_field($sub_field);
+									$this->acf->create_field($sub_field);
 									
 									?>
 								</td>
@@ -270,7 +270,7 @@ class acf_Flexible_content extends acf_Field
 
 										
 										// create field
-										$this->parent->create_field($sub_field);
+										$this->acf->create_field($sub_field);
 										
 										?>
 									</td>
@@ -367,7 +367,7 @@ class acf_Flexible_content extends acf_Field
 		
 		
 		// get name of all fields for use in field type
-		foreach($this->parent->fields as $f)
+		foreach($this->acf->fields as $f)
 		{
 			if( $f->name )
 			{
@@ -413,7 +413,7 @@ class acf_Flexible_content extends acf_Field
 					<td class="acf_fc_label" style="padding-left:0;">
 						<label><?php _e('Label','acf'); ?></label>
 						<?php 
-						$this->parent->create_field(array(
+						$this->acf->create_field(array(
 							'type'	=>	'text',
 							'name'	=>	'fields['.$key.'][layouts][' . $layout_key . '][label]',
 							'value'	=>	$layout['label'],
@@ -423,7 +423,7 @@ class acf_Flexible_content extends acf_Field
 					<td class="acf_fc_name">
 						<label><?php _e('Name','acf'); ?></label>
 						<?php 
-						$this->parent->create_field(array(
+						$this->acf->create_field(array(
 							'type'	=>	'text',
 							'name'	=>	'fields['.$key.'][layouts][' . $layout_key . '][name]',
 							'value'	=>	$layout['name'],
@@ -433,7 +433,7 @@ class acf_Flexible_content extends acf_Field
 					<td class="acf_fc_display" style="padding-right:0;">
 						<label><?php _e('Display','acf'); ?></label>
 						<?php 
-						$this->parent->create_field(array(
+						$this->acf->create_field(array(
 							'type'	=>	'select',
 							'name'	=>	'fields['.$key.'][layouts][' . $layout_key . '][display]',
 							'value'	=>	$layout['display'],
@@ -500,7 +500,7 @@ class acf_Flexible_content extends acf_Field
 									</td>
 									<td>
 										<?php 
-										$this->parent->create_field(array(
+										$this->acf->create_field(array(
 											'type'	=>	'text',
 											'name'	=>	'fields['.$key.'][layouts][' . $layout_key . '][sub_fields]['.$sub_field['key'].'][label]',
 											'value'	=>	$sub_field['label'],
@@ -516,7 +516,7 @@ class acf_Flexible_content extends acf_Field
 									</td>
 									<td>
 										<?php 
-										$this->parent->create_field(array(
+										$this->acf->create_field(array(
 											'type'	=>	'text',
 											'name'	=>	'fields['.$key.'][layouts][' . $layout_key . '][sub_fields]['.$sub_field['key'].'][name]',
 											'value'	=>	$sub_field['name'],
@@ -529,7 +529,7 @@ class acf_Flexible_content extends acf_Field
 									<td class="label"><label><span class="required">*</span><?php _e("Field Type",'acf'); ?></label></td>
 									<td>
 										<?php 
-										$this->parent->create_field(array(
+										$this->acf->create_field(array(
 											'type'	=>	'select',
 											'name'	=>	'fields['.$key.'][layouts][' . $layout_key . '][sub_fields]['.$sub_field['key'].'][type]',
 											'value'	=>	$sub_field['type'],
@@ -549,7 +549,7 @@ class acf_Flexible_content extends acf_Field
 											$sub_field['instructions'] = "";
 										}
 										
-										$this->parent->create_field(array(
+										$this->acf->create_field(array(
 											'type'	=>	'text',
 											'name'	=>	'fields['.$key.'][layouts][' . $layout_key . '][sub_fields]['.$sub_field['key'].'][instructions]',
 											'value'	=>	$sub_field['instructions'],
@@ -571,7 +571,7 @@ class acf_Flexible_content extends acf_Field
 											$sub_field['column_width'] = "";
 										}
 										
-										$this->parent->create_field(array(
+										$this->acf->create_field(array(
 											'type'	=>	'number',
 											'name'	=>	'fields['.$key.'][layouts][' . $layout_key . '][sub_fields]['.$sub_field['key'].'][column_width]',
 											'value'	=>	$sub_field['column_width'],
@@ -582,9 +582,9 @@ class acf_Flexible_content extends acf_Field
 								</tr>
 								<?php 
 								
-								if( isset($this->parent->fields[ $sub_field['type'] ]) )
+								if( isset($this->acf->fields[ $sub_field['type'] ]) )
 								{
-									$this->parent->fields[$sub_field['type']]->create_options($key.'][layouts][' . $layout_key . '][sub_fields]['.$sub_field['key'], $sub_field);
+									$this->acf->fields[$sub_field['type']]->create_options($key.'][layouts][' . $layout_key . '][sub_fields]['.$sub_field['key'], $sub_field);
 								}
 								
 								?>
@@ -621,7 +621,7 @@ class acf_Flexible_content extends acf_Field
 	</td>
 	<td>
 		<?php 
-		$this->parent->create_field(array(
+		$this->acf->create_field(array(
 			'type'	=>	'text',
 			'name'	=>	'fields['.$key.'][button_label]',
 			'value'	=>	$field['button_label'],
@@ -680,7 +680,7 @@ class acf_Flexible_content extends acf_Field
 					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
 
 					// save sub field value
-					$this->parent->update_value($post_id, $sub_field, $value);
+					$this->acf->update_value($post_id, $sub_field, $value);
 				}
 			}
 		}
@@ -810,7 +810,7 @@ class acf_Flexible_content extends acf_Field
 //						// update full name
 //						$sub_field['name'] = $field['name'] . '_' . $i . '_' . $field_name;
 //
-//						$values[$i][$field_name] = $this->parent->get_value($post_id, $sub_field);
+//						$values[$i][$field_name] = $this->acf->get_value($post_id, $sub_field);
 //					}
 //				}
 //			}
@@ -868,7 +868,7 @@ class acf_Flexible_content extends acf_Field
 					// update full name
 					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $field_name;
 					
-					$values[$i][$field_name] = $this->parent->get_value_for_api($post_id, $sub_field);
+					$values[$i][$field_name] = $this->acf->get_value_for_api($post_id, $sub_field);
 				}
 			}
 			

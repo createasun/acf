@@ -13,9 +13,9 @@ class acf_Date_picker extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
-    	parent::__construct($parent);
+    	parent::__construct($acf);
     	
     	$this->name = 'date_picker';
 		$this->title = __("Date Picker",'acf');
