@@ -653,7 +653,7 @@ class acf_field_group
         // ********************************
         // wdh : we want to replace the clone init 'field_n' keys with the field name/slug
         // why? because we want to be able to drill down the array tree to find values via name
-        // - all field_groups are encapsulated saved as arrays now not individual postmeta
+        // - all field_groups are saved as arrays now not individual postmeta
 
 //        foreach( $_POST['fields'] as $key => $field )
 //        {
