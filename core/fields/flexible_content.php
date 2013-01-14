@@ -15,14 +15,17 @@ class acf_Flexible_content extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'flexible_content';
+        parent::__construct($acf);
+
+        $this->type = 'flexible_content';
 		$this->title = __("Flexible Content",'acf');
+
+        add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
+
+        add_filter(ACF_UPDATE_VALUE_.TYPE_.$this->type,      array($this, 'update_value_subfields')    );
 		
-		
-		// filters
-		add_filter('acf_save_field-' . $this->name, array($this, 'acf_save_field'));
    	}
 
 
@@ -391,7 +394,7 @@ class acf_Flexible_content extends acf_Field
 			);
 			
 ?>
-<tr class="field_option field_option_<?php echo $this->name; ?>" data-id="<?php echo $layout_key; ?>">
+<tr class="field_option field_option_<?php echo $this->type; ?>" data-id="<?php echo $layout_key; ?>">
 	<td class="label">
 		<label><?php _e("Layout",'acf'); ?></label>
 		<p class="desription">
@@ -615,7 +618,7 @@ class acf_Flexible_content extends acf_Field
 	</div>
 	</td>
 </tr><?php endforeach; endif; ?>
-<tr class="field_option field_option_<?php echo $this->name; ?>">
+<tr class="field_option field_option_<?php echo $this->type; ?>">
 	<td class="label">
 		<label><?php _e("Button Label",'acf'); ?></label>
 	</td>
@@ -702,6 +705,7 @@ class acf_Flexible_content extends acf_Field
 	
 	function acf_save_field( $field )
 	{
+        phplog('sola-acf.php','$field = ',$field );
 
 		// format sub_fields
 		if($field['layouts'])

@@ -15,14 +15,17 @@ class acf_Repeater extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'repeater';
+        parent::__construct($acf);
+
+        $this->type = 'repeater';
 		$this->title = __("Repeater",'acf');
-		
-		
-		// filters
-		add_filter('acf_save_field-repeater', array($this, 'acf_save_field'));
+
+        add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
+
+        add_filter(ACF_UPDATE_VALUE_.TYPE_.$this->type,      array($this, 'update_value_subfields')    );
+
    	}
 
     /**
@@ -361,7 +364,7 @@ class acf_Repeater extends acf_Field
 		unset( $fields_names['tab'] );
 		
 		?>
-<tr class="field_option field_option_<?php echo $this->name; ?> field_option_<?php echo $this->name; ?>_fields">
+<tr class="field_option field_option_<?php echo $this->type; ?> field_option_<?php echo $this->type; ?>_fields">
 	<td class="label">
 		<label><?php _e("Repeater Fields",'acf'); ?></label>
 	</td>
@@ -536,7 +539,7 @@ class acf_Repeater extends acf_Field
 	</div>
 	</td>
 </tr>
-<tr class="field_option field_option_<?php echo $this->name; ?>">
+<tr class="field_option field_option_<?php echo $this->type; ?>">
 	<td class="label">
 		<label><?php _e("Minimum Rows",'acf'); ?></label>
 	</td>
@@ -550,7 +553,7 @@ class acf_Repeater extends acf_Field
 		?>
 	</td>
 </tr>
-<tr class="field_option field_option_<?php echo $this->name; ?>">
+<tr class="field_option field_option_<?php echo $this->type; ?>">
 	<td class="label">
 		<label><?php _e("Maximum Rows",'acf'); ?></label>
 	</td>
@@ -564,7 +567,7 @@ class acf_Repeater extends acf_Field
 		?>
 	</td>
 </tr>
-<tr class="field_option field_option_<?php echo $this->name; ?> field_option_<?php echo $this->name; ?>_layout">
+<tr class="field_option field_option_<?php echo $this->type; ?> field_option_<?php echo $this->type; ?>_layout">
 	<td class="label">
 		<label><?php _e("Layout",'acf'); ?></label>
 	</td>
@@ -583,7 +586,7 @@ class acf_Repeater extends acf_Field
 		?>
 	</td>
 </tr>
-<tr class="field_option field_option_<?php echo $this->name; ?>">
+<tr class="field_option field_option_<?php echo $this->type; ?>">
 	<td class="label">
 		<label><?php _e("Button Label",'acf'); ?></label>
 	</td>
@@ -613,7 +616,7 @@ class acf_Repeater extends acf_Field
 	
 	function acf_save_field($field)
 	{
-//        phplog('repeater.php','$field=',$field );
+        phplog('repeater.php','$field=',$field );
 
 		// format sub_fields
 		if( $field['sub_fields'] )

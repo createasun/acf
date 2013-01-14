@@ -15,11 +15,11 @@ class acf_File extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'file';
+        parent::__construct($acf);
+
+        $this->type = 'file';
 		$this->title = __('File','acf');
-		
+
 		add_action('admin_head-media-upload-popup', array($this, 'popup_head'));
 		add_filter('get_media_item_args', array($this, 'allow_file_insertion'));
 		add_action('wp_ajax_acf_select_file', array($this, 'ajax_select_file'));
@@ -195,7 +195,7 @@ class acf_File extends acf_Field
 		$field = array_merge($defaults, $field);
 
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Return Value",'acf'); ?></label>
 			</td>

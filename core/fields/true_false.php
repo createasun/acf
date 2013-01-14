@@ -15,10 +15,14 @@ class acf_True_false extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'true_false';
+        parent::__construct($acf);
+
+        $this->type = 'true_false';
 		$this->title = __("True / False",'acf');
+
+//      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
 		
    	}
 
@@ -63,7 +67,7 @@ class acf_True_false extends acf_Field
 	{	
 		$field['message'] = isset($field['message']) ? $field['message'] : '';
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Message",'acf'); ?></label>
 				<p class="description"><?php _e("eg. Show extra content",'acf'); ?></a></p>

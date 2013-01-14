@@ -15,13 +15,16 @@ class acf_Relationship extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'relationship';
+        parent::__construct($acf);
+
+        $this->type = 'relationship';
 		$this->title = __("Relationship",'acf');
-		
-		
-		// actions
+
+//      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
+
+        // actions
 		add_action('wp_ajax_acf_get_relationship_results', array($this, 'acf_get_relationship_results'));
 
         // **************************************
@@ -418,7 +421,7 @@ class acf_Relationship extends acf_Field
 		
 		
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label for=""><?php _e("Post Type",'acf'); ?></label>
 			</td>
@@ -447,7 +450,7 @@ class acf_Relationship extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Filter from Taxonomy",'acf'); ?></label>
 			</td>
@@ -470,7 +473,7 @@ class acf_Relationship extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Maximum posts",'acf'); ?></label>
 			</td>

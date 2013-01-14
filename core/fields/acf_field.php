@@ -9,7 +9,7 @@
  
 class acf_Field
 {
-	var $name;
+	var $type;
 	var $title;
 	var $acf;
 	
@@ -17,9 +17,9 @@ class acf_Field
 	/*--------------------------------------------------------------------------------------
 	*
 	*	Constructor
-	*	- $acf is passed buy reference so you can play with the acf functions
+	*	- $acf is passed by reference so you can play with the acf functions
 	*
-	*	@author Elliot Condon
+	*	@author Elliot Condon / Wayne D Harris
 	*	@since 2.2.0
 	* 
 	*-------------------------------------------------------------------------------------*/
@@ -27,6 +27,7 @@ class acf_Field
 	function __construct($acf)
 	{
 		$this->acf = $acf;
+
 	}
 
 
@@ -51,7 +52,7 @@ class acf_Field
 	*	create_options
 	*	- called from core/field_meta_box.php to create special options
 	*
-	*	@params : 	$key (int) - neccessary to group field data together for saving
+	*	@params : 	$key (int) - necessary to group field data together for saving
 	*				$field (array) - the field data from the database
 	*	@author Elliot Condon
 	*	@since 2.2.0
@@ -99,7 +100,7 @@ class acf_Field
 		
 	}
 
-	
+
 	/*--------------------------------------------------------------------------------------
 	*
 	*	update_value
@@ -272,6 +273,108 @@ class acf_Field
 	{
 		return $this->get_value($post_id, $field);
 	}
+
+    /*--------------------------------------------------------------------------------------
+    *
+    *	update_value_subfields
+    *   repeater/flexible content
+    *
+    *   @author Wayne D Harris
+    *	@since
+    *
+    *-------------------------------------------------------------------------------------*/
+    function update_value_subfields( $field_value )
+    {
+//        phplog('sola-acf.php','............filter subfields..............................'  );
+//        phplog('sola-acf.php','PRE FILTER $field_value=', $field_value  );
+
+        if( $field_value['acfcloneindex'] )
+        {
+            unset( $field_value['acfcloneindex'] );
+        }
+
+//        phplog('sola-acf.php','POST FILTER $field_value=', $field_value  );
+//        phplog('sola-acf.php','..........................................................'  );
+
+        return $field_value;
+    }
+    /*--------------------------------------------------------------------------------------
+	*
+	*	save_field_choices
+	*	- called before saving the field to the database.
+    *   filters all fields with choices: select/checkbox/radio
+	*
+	*	@author Elliot Condon / Wayne D Harris
+	*	@since 2.2.0
+	*
+	*-------------------------------------------------------------------------------------*/
+
+    function save_field_choices( $field )
+    {
+//        phplog('select.php','$field=',$field );
+
+        // vars
+        $defaults = array(
+            'choices'	=>	'',
+        );
+
+        $field = array_merge($defaults, $field);
+
+
+        // check if is array. Normal back end edit posts a textarea, but a user might use update_field from the front end
+        if( is_array( $field['choices'] ))
+        {
+            return $field;
+        }
+
+
+        // vars
+        $new_choices = array();
+
+
+        // explode choices from each line
+        if( $field['choices'] )
+        {
+            // stripslashes ("")
+            $field['choices'] = stripslashes_deep($field['choices']);
+
+            if(strpos($field['choices'], "\n") !== false)
+            {
+                // found multiple lines, explode it
+                $field['choices'] = explode("\n", $field['choices']);
+            }
+            else
+            {
+                // no multiple lines!
+                $field['choices'] = array($field['choices']);
+            }
+
+
+            // key => value
+            foreach($field['choices'] as $choice)
+            {
+                if(strpos($choice, ' : ') !== false)
+                {
+                    $choice = explode(' : ', $choice);
+                    $new_choices[trim($choice[0])] = trim($choice[1]);
+                }
+                else
+                {
+                    $new_choices[trim($choice)] = trim($choice);
+                }
+            }
+        }
+
+
+
+        // update choices
+        $field['choices'] = $new_choices;
+
+
+        // return updated field
+        return $field;
+
+    }
 	
 }
 

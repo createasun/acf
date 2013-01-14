@@ -17,7 +17,7 @@ class acf_Date_picker extends acf_Field
 	{
     	parent::__construct($acf);
     	
-    	$this->name = 'date_picker';
+    	$this->type = 'date_picker';
 		$this->title = __("Date Picker",'acf');
 		
    	}
@@ -84,7 +84,7 @@ class acf_Date_picker extends acf_Field
 
 
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Save format",'acf'); ?></label>
 				<p class="description"><?php _e("This format will determin the value saved to the database and returned via the API",'acf'); ?></p>
@@ -94,7 +94,7 @@ class acf_Date_picker extends acf_Field
 				<input type="text" name="fields[<?php echo $key; ?>][date_format]" value="<?php echo $field['date_format']; ?>" />
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Display format",'acf'); ?></label>
 				<p class="description"><?php _e("This format will be seen by the user when entering a value",'acf'); ?></p>

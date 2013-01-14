@@ -15,10 +15,14 @@ class acf_Textarea extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'textarea';
+        parent::__construct($acf);
+
+        $this->type = 'textarea';
 		$this->title = __("Text Area",'acf');
+
+//      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
 		
    	}
    	
@@ -59,7 +63,7 @@ class acf_Textarea extends acf_Field
 		$field['formatting'] = isset($field['formatting']) ? $field['formatting'] : 'br';
 		
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Default Value",'acf'); ?></label>
 			</td>
@@ -73,7 +77,7 @@ class acf_Textarea extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Formatting",'acf'); ?></label>
 				<p class="description"><?php _e("Define how to render html tags / new lines",'acf'); ?></p>

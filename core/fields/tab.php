@@ -15,10 +15,14 @@ class acf_Tab extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'tab';
+        parent::__construct($acf);
+
+        $this->type = 'tab';
 		$this->title = __("Tab",'acf');
+
+//      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
 		
    	}
    
@@ -52,7 +56,7 @@ class acf_Tab extends acf_Field
 	function create_options($key, $field)
 	{
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Instructions",'acf'); ?></label>
 			</td>

@@ -40,9 +40,10 @@ $fields[] = array(
 // get name of all fields for use in field type drop down
 foreach($this->parent->fields as $f)
 {
-	if( $f->name )
+	// wdh : changed 'name' to 'type' for better readability
+    if( $f->type )
 	{
-		$fields_names[$f->name] = $f->title;
+		$fields_names[$f->type] = $f->title;
 	}
 }
 

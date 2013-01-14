@@ -15,10 +15,14 @@ class acf_Image extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'image';
+        parent::__construct($acf);
+
+        $this->type = 'image';
 		$this->title = __('Image','acf');
+
+//      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
 		
 		add_action('admin_head-media-upload-popup', array($this, 'popup_head'));
 		add_filter('get_media_item_args', array($this, 'allow_img_insertion'));
@@ -196,7 +200,7 @@ class acf_Image extends acf_Field
 		$field = array_merge($defaults, $field);
 		
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Return Value",'acf'); ?></label>
 			</td>
@@ -216,7 +220,7 @@ class acf_Image extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Preview Size",'acf'); ?></label>
 			</td>

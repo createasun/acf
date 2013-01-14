@@ -15,17 +15,20 @@ class acf_Wysiwyg extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'wysiwyg';
+        parent::__construct($acf);
+
+        $this->type = 'wysiwyg';
 		$this->title = __("Wysiwyg Editor",'acf');
-		
+
 		add_action( 'acf_head-input', array( $this, 'acf_head') );
 
+//      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
    	}
    	
 	
-	
+
    	/*--------------------------------------------------------------------------------------
 	*
 	*	admin_head
@@ -76,7 +79,7 @@ class acf_Wysiwyg extends acf_Field
 		$field = array_merge($defaults, $field);
 		
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Default Value",'acf'); ?></label>
 			</td>
@@ -90,7 +93,7 @@ class acf_Wysiwyg extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Toolbar",'acf'); ?></label>
 			</td>
@@ -109,7 +112,7 @@ class acf_Wysiwyg extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Show Media Upload Buttons?",'acf'); ?></label>
 			</td>
@@ -128,7 +131,7 @@ class acf_Wysiwyg extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Run filter \"the_content\"?",'acf'); ?></label>
 				<p class="description"><?php _e("Enable this filter to use shortcodes within the WYSIWYG field",'acf'); ?></p>

@@ -15,10 +15,14 @@ class acf_Number extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'number';
+        parent::__construct($acf);
+
+        $this->type = 'number';
 		$this->title = __("Number",'acf');
+
+//      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
 		
    	}
    
@@ -60,7 +64,7 @@ class acf_Number extends acf_Field
 
 		
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Default Value",'acf'); ?></label>
 			</td>

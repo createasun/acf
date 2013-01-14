@@ -17,14 +17,14 @@ class acf_Select extends acf_Field
 	{
     	parent::__construct($acf);
     	
-    	$this->name = 'select';
+    	$this->type = 'select';
 		$this->title = __("Select",'acf');
-		
-		
-		// filters (for all fields with choices)
-        add_filter('acf_save_field-select', array($this, 'acf_save_field'));
-		add_filter('acf_save_field-checkbox', array($this, 'acf_save_field'));
-		add_filter('acf_save_field-radio', array($this, 'acf_save_field'));
+
+//      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
+
+        add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,      array($this,'save_field_choices') );
    	}
 	
 
@@ -180,7 +180,7 @@ class acf_Select extends acf_Field
 		}
 
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label for=""><?php _e("Choices",'acf'); ?></label>
 				<p class="description"><?php _e("Enter your choices one per line",'acf'); ?><br />
@@ -203,7 +203,7 @@ class acf_Select extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Default Value",'acf'); ?></label>
 			</td>
@@ -217,7 +217,7 @@ class acf_Select extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Allow Null?",'acf'); ?></label>
 			</td>
@@ -236,7 +236,7 @@ class acf_Select extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Select multiple values?",'acf'); ?></label>
 			</td>
@@ -258,8 +258,21 @@ class acf_Select extends acf_Field
 
 		<?php
 	}
-	
-	
+
+    /*--------------------------------------------------------------------------------------
+	*
+	*	pre_save_field
+	*	- called just before saving the field to the database.
+	*
+	*	@author Elliot Condon
+	*	@since 2.2.0
+	*
+	*-------------------------------------------------------------------------------------*/
+
+//    function acf_save_field( $field )
+//    {
+//        return $this->acf->save_field_choices($field);
+//    }
 	/*--------------------------------------------------------------------------------------
 	*
 	*	pre_save_field
@@ -270,72 +283,72 @@ class acf_Select extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function acf_save_field( $field )
-	{
-        phplog('select.php','$field=',$field );
-
-		// vars
-		$defaults = array(
-			'choices'	=>	'',
-		);
-		
-		$field = array_merge($defaults, $field);
-		
-		
-		// check if is array. Normal back end edit posts a textarea, but a user might use update_field from the front end
-		if( is_array( $field['choices'] ))
-		{
-		    return $field;
-		}
-
-		
-		// vars
-		$new_choices = array();
-		
-		
-		// explode choices from each line
-		if( $field['choices'] )
-		{
-			// stripslashes ("")
-			$field['choices'] = stripslashes_deep($field['choices']);
-		
-			if(strpos($field['choices'], "\n") !== false)
-			{
-				// found multiple lines, explode it
-				$field['choices'] = explode("\n", $field['choices']);
-			}
-			else
-			{
-				// no multiple lines! 
-				$field['choices'] = array($field['choices']);
-			}
-			
-			
-			// key => value
-			foreach($field['choices'] as $choice)
-			{
-				if(strpos($choice, ' : ') !== false)
-				{
-					$choice = explode(' : ', $choice);
-					$new_choices[trim($choice[0])] = trim($choice[1]);
-				}
-				else
-				{
-					$new_choices[trim($choice)] = trim($choice);
-				}
-			}
-		}
-		
-		
-		
-		// update choices
-		$field['choices'] = $new_choices;
-		
-		
-		// return updated field
-		return $field;
-
-	}
+//	function acf_save_field( $field )
+//	{
+//        phplog('select.php','*******************************************$field=',$field );
+//
+//		// vars
+//		$defaults = array(
+//			'choices'	=>	'',
+//		);
+//
+//		$field = array_merge($defaults, $field);
+//
+//
+//		// check if is array. Normal back end edit posts a textarea, but a user might use update_field from the front end
+//		if( is_array( $field['choices'] ))
+//		{
+//		    return $field;
+//		}
+//
+//
+//		// vars
+//		$new_choices = array();
+//
+//
+//		// explode choices from each line
+//		if( $field['choices'] )
+//		{
+//			// stripslashes ("")
+//			$field['choices'] = stripslashes_deep($field['choices']);
+//
+//			if(strpos($field['choices'], "\n") !== false)
+//			{
+//				// found multiple lines, explode it
+//				$field['choices'] = explode("\n", $field['choices']);
+//			}
+//			else
+//			{
+//				// no multiple lines!
+//				$field['choices'] = array($field['choices']);
+//			}
+//
+//
+//			// key => value
+//			foreach($field['choices'] as $choice)
+//			{
+//				if(strpos($choice, ' : ') !== false)
+//				{
+//					$choice = explode(' : ', $choice);
+//					$new_choices[trim($choice[0])] = trim($choice[1]);
+//				}
+//				else
+//				{
+//					$new_choices[trim($choice)] = trim($choice);
+//				}
+//			}
+//		}
+//
+//
+//
+//		// update choices
+//		$field['choices'] = $new_choices;
+//
+//
+//		// return updated field
+//		return $field;
+//
+//	}
 	
 	
 	/*--------------------------------------------------------------------------------------

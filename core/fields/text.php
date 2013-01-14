@@ -15,13 +15,17 @@ class acf_Text extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'text';
+        parent::__construct($acf);
+
+        $this->type = 'text';
 		$this->title = __("Text",'acf');
-		
+
+//      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field_type')   );
+        add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value_type')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value_type') );
    	}
    
+
 
 	/*--------------------------------------------------------------------------------------
 	*
@@ -60,7 +64,7 @@ class acf_Text extends acf_Field
 		$field = array_merge($defaults, $field);
 
 		?>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Default Value",'acf'); ?></label>
 			</td>
@@ -74,7 +78,7 @@ class acf_Text extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Formatting",'acf'); ?></label>
 				<p class="description"><?php _e("Define how to render html tags",'acf'); ?></p>
@@ -95,8 +99,22 @@ class acf_Text extends acf_Field
 		</tr>
 		<?php
 	}
-	
-	
+
+    /*--------------------------------------------------------------------------------------
+    *
+    *	acf_load_value
+    *
+    *	@author Wayne D Harris
+    *	@since 2.2.0
+    *
+    *-------------------------------------------------------------------------------------*/
+
+    function acf_load_value_type($value)
+    {
+        $value = htmlspecialchars($value, ENT_QUOTES);
+
+        return $value;
+    }
 	/*--------------------------------------------------------------------------------------
 	*
 	*	get_value
@@ -106,14 +124,14 @@ class acf_Text extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function get_value($post_id, $field)
-	{
-		$value = parent::get_value($post_id, $field);
-		
-		$value = htmlspecialchars($value, ENT_QUOTES);
-		
-		return $value;
-	}
+//	function get_value($post_id, $field)
+//	{
+//		$value = parent::get_value($post_id, $field);
+//
+//		$value = htmlspecialchars($value, ENT_QUOTES);
+//
+//		return $value;
+//	}
 	
 	/*--------------------------------------------------------------------------------------
 	*

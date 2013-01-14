@@ -15,11 +15,18 @@ class acf_Radio extends acf_Field
 	
 	function __construct($acf)
 	{
-    	parent::__construct($acf);
-    	
-    	$this->name = 'radio';
+        parent::__construct($acf);
+
+        $this->type = 'radio';
 		$this->title = __('Radio Button','acf');
-		
+
+//      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
+//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
+
+        add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this,'save_field_choices') );
+
+
    	}
    	
    		
@@ -109,7 +116,7 @@ class acf_Radio extends acf_Field
 		?>
 
 
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label for=""><?php _e("Choices",'acf'); ?></label>
 				<p class="description"><?php _e("Enter your choices one per line",'acf'); ?><br />
@@ -132,7 +139,7 @@ class acf_Radio extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label><?php _e("Default Value",'acf'); ?></label>
 			</td>
@@ -146,7 +153,7 @@ class acf_Radio extends acf_Field
 				?>
 			</td>
 		</tr>
-		<tr class="field_option field_option_<?php echo $this->name; ?>">
+		<tr class="field_option field_option_<?php echo $this->type; ?>">
 			<td class="label">
 				<label for=""><?php _e("Layout",'acf'); ?></label>
 			</td>
