@@ -12,7 +12,7 @@
 class acf_field_group
 {
 
-	var $parent,
+	var $acf,
 		$data;
 		
 	
@@ -24,11 +24,11 @@ class acf_field_group
 	*  @created: 23/06/12
 	*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
 	
 		// vars
-		$this->parent = $parent;
+		$this->acf = $acf;
 		
 		
 		// actions
@@ -207,7 +207,7 @@ class acf_field_group
 	
 	function meta_box_fields()
 	{
-		include( $this->parent->path . 'core/views/meta_box_fields.php' );
+		include( $this->acf->path . 'core/views/meta_box_fields.php' );
 	}
 	
 	
@@ -221,7 +221,7 @@ class acf_field_group
 
 	function meta_box_location()
 	{
-		include( $this->parent->path . 'core/views/meta_box_location.php' );
+		include( $this->acf->path . 'core/views/meta_box_location.php' );
 	}
 	
 	
@@ -235,7 +235,7 @@ class acf_field_group
 	
 	function meta_box_options()
 	{
-		include( $this->parent->path . 'core/views/meta_box_options.php' );
+		include( $this->acf->path . 'core/views/meta_box_options.php' );
 	}
 	
 	
@@ -285,7 +285,7 @@ class acf_field_group
 		$field = array();
 
 		// render options
-		$this->parent->fields[ $options['field_type'] ]->create_options($options['field_key'], $field);
+		$this->acf->fields[ $options['field_type'] ]->create_options($options['field_key'], $field);
 
 		die();
 
@@ -335,7 +335,7 @@ class acf_field_group
 			case "post_type":
 				
 				// all post types except attachment
-				$choices = $this->parent->get_post_types( array('attachment') );
+				$choices = $this->acf->get_post_types( array('attachment') );
 
 				break;
 			
@@ -497,7 +497,7 @@ class acf_field_group
 			
 			case "options_page" :
 				
-				$defaults = $this->parent->defaults['options_page'];
+				$defaults = $this->acf->defaults['options_page'];
 				
 				$choices = array(
 					'acf-options' => $defaults['title']
@@ -518,7 +518,7 @@ class acf_field_group
 			
 			case "taxonomy" :
 				
-				$choices = $this->parent->get_taxonomies_for_select( array('simple_value' => true) );
+				$choices = $this->acf->get_taxonomies_for_select( array('simple_value' => true) );
 				$optgroup = true;
 								
 				break;
@@ -559,7 +559,7 @@ class acf_field_group
 				
 		}
 		
-		$this->parent->create_field(array(
+		$this->acf->create_field(array(
 			'type'	=>	'select',
 			'name'	=>	'location[rules][' . $options['key'] . '][value]',
 			'value'	=>	$options['value'],
@@ -692,10 +692,10 @@ class acf_field_group
                 // ********************************
                 // wdh : dont save yet - cache for now
                 // wdh : removed
-//              $this->parent->update_field( $acf_post_id, $field);
+//              $this->acf->update_field( $acf_post_id, $field);
                 // wdh : added
                 // * important for sub-field saving ( repeater & flex content )
-                $field = $this->parent->apply_save_field_filters( $field );
+                $field = $this->acf->apply_save_field_filters( $field );
 
                 // ** important **
                 // wdh : save field via key = name not 'field_n' key
@@ -869,7 +869,7 @@ class acf_field_group
 		
 		
 		// return id
-		$id = $this->parent->get_next_field_id();
+		$id = $this->acf->get_next_field_id();
 		
 		
 		// die

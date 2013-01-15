@@ -367,16 +367,10 @@ class acf_Flexible_content extends acf_Field
 				'sub_fields' => array(),
 			);
 		}
-		
-		
-		// get name of all fields for use in field type
-		foreach($this->acf->fields as $f)
-		{
-			if( $f->name )
-			{
-				$fields_names[$f->name] = $f->title;
-			}
-		}
+
+        // wdh
+        $fields_names = $this->acf->get_field_type_titles();
+
 		unset( $fields_names['flexible_content'], $fields_names['tab'] );
 		
 		

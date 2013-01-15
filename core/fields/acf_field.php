@@ -112,50 +112,50 @@ class acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function update_value($post_id, $field, $value)
-	{
-		// strip slashes
-		$value = stripslashes_deep($value);
-
-
-		
-		
-		// apply filters
-		$value = apply_filters('acf_update_value', $value, $field, $post_id );
-		
-		$keys = array('type', 'name', 'key');
-		foreach( $keys as $key )
-		{
-			if( isset($field[ $key ]) )
-			{
-				$value = apply_filters('acf_update_value-' . $field[ $key ], $value, $field, $post_id);
-			}
-		}
-				
-		
-		// if $post_id is a string, then it is used in the everything fields and can be found in the options table
-		if( is_numeric($post_id) )
-		{
-            update_post_meta($post_id, $field['name'], $value);
-			update_post_meta($post_id, '_' . $field['name'], $field['key']);
-		}
-		elseif( strpos($post_id, 'user_') !== false )
-		{
-			$post_id = str_replace('user_', '', $post_id);
-			update_user_meta($post_id, $field['name'], $value);
-			update_user_meta($post_id, '_' . $field['name'], $field['key']);
-		}
-		else
-		{
-			update_option( $post_id . '_' . $field['name'], $value );
-			update_option( '_' . $post_id . '_' . $field['name'], $field['key'] );
-		}
-		
-		
-		//clear the cache for this field
-		wp_cache_delete('acf_get_field_' . $post_id . '_' . $field['name']);
-		
-	}
+//	function update_value($post_id, $field, $value)
+//	{
+//		// strip slashes
+//		$value = stripslashes_deep($value);
+//
+//
+//
+//
+//		// apply filters
+//		$value = apply_filters('acf_update_value', $value, $field, $post_id );
+//
+//		$keys = array('type', 'name', 'key');
+//		foreach( $keys as $key )
+//		{
+//			if( isset($field[ $key ]) )
+//			{
+//				$value = apply_filters('acf_update_value-' . $field[ $key ], $value, $field, $post_id);
+//			}
+//		}
+//
+//
+//		// if $post_id is a string, then it is used in the everything fields and can be found in the options table
+//		if( is_numeric($post_id) )
+//		{
+//            update_post_meta($post_id, $field['name'], $value);
+//			update_post_meta($post_id, '_' . $field['name'], $field['key']);
+//		}
+//		elseif( strpos($post_id, 'user_') !== false )
+//		{
+//			$post_id = str_replace('user_', '', $post_id);
+//			update_user_meta($post_id, $field['name'], $value);
+//			update_user_meta($post_id, '_' . $field['name'], $field['key']);
+//		}
+//		else
+//		{
+//			update_option( $post_id . '_' . $field['name'], $value );
+//			update_option( '_' . $post_id . '_' . $field['name'], $field['key'] );
+//		}
+//
+//
+//		//clear the cache for this field
+//		wp_cache_delete('acf_get_field_' . $post_id . '_' . $field['name']);
+//
+//	}
 	
 	
 	
@@ -170,94 +170,94 @@ class acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function get_value($post_id, $field)
-	{
-		$value = false;
-		
-		// if $post_id is a string, then it is used in the everything fields and can be found in the options table
-		if( is_numeric($post_id) )
-		{
-			$value = get_post_meta( $post_id, $field['name'], false );
-			
-			// value is an array, check and assign the real value / default value
-			if( !isset($value[0]) )
-			{
-				if( isset($field['default_value']) )
-				{
-					$value = $field['default_value'];
-				}
-				else
-				{
-					$value = false;
-				}
-		 	}
-		 	else
-		 	{
-			 	$value = $value[0];
-		 	}
-		}
-		elseif( strpos($post_id, 'user_') !== false )
-		{
-			$post_id = str_replace('user_', '', $post_id);
-			
-			$value = get_user_meta( $post_id, $field['name'], false );
-			
-			// value is an array, check and assign the real value / default value
-			if( !isset($value[0]) )
-			{
-				if( isset($field['default_value']) )
-				{
-					$value = $field['default_value'];
-				}
-				else
-				{
-					$value = false;
-				}
-		 	}
-		 	else
-		 	{
-			 	$value = $value[0];
-		 	}
-		}
-		else
-		{
-			$value = get_option( $post_id . '_' . $field['name'], null );
-			
-			if( is_null($value) )
-			{
-				if( isset($field['default_value']) )
-				{
-					$value = $field['default_value'];
-				}
-				else
-				{
-					$value = false;
-				}
-		 	}
-
-		}
-		
-		
-		// if value was duplicated, it may now be a serialized string!
-		$value = maybe_unserialize($value);
-		
-		
-		// apply filters
-		$value = apply_filters('acf_load_value', $value, $field, $post_id );
-		
-		$keys = array('type', 'name', 'key');
-		foreach( $keys as $key )
-		{
-			if( isset($field[ $key ]) )
-			{
-				$value = apply_filters('acf_load_value-' . $field[ $key ], $value, $field, $post_id);
-			}
-		}
-		
-		
-		
-		return $value;
-	}
+//	function get_value($post_id, $field)
+//	{
+//		$value = false;
+//
+//		// if $post_id is a string, then it is used in the everything fields and can be found in the options table
+//		if( is_numeric($post_id) )
+//		{
+//			$value = get_post_meta( $post_id, $field['name'], false );
+//
+//			// value is an array, check and assign the real value / default value
+//			if( !isset($value[0]) )
+//			{
+//				if( isset($field['default_value']) )
+//				{
+//					$value = $field['default_value'];
+//				}
+//				else
+//				{
+//					$value = false;
+//				}
+//		 	}
+//		 	else
+//		 	{
+//			 	$value = $value[0];
+//		 	}
+//		}
+//		elseif( strpos($post_id, 'user_') !== false )
+//		{
+//			$post_id = str_replace('user_', '', $post_id);
+//
+//			$value = get_user_meta( $post_id, $field['name'], false );
+//
+//			// value is an array, check and assign the real value / default value
+//			if( !isset($value[0]) )
+//			{
+//				if( isset($field['default_value']) )
+//				{
+//					$value = $field['default_value'];
+//				}
+//				else
+//				{
+//					$value = false;
+//				}
+//		 	}
+//		 	else
+//		 	{
+//			 	$value = $value[0];
+//		 	}
+//		}
+//		else
+//		{
+//			$value = get_option( $post_id . '_' . $field['name'], null );
+//
+//			if( is_null($value) )
+//			{
+//				if( isset($field['default_value']) )
+//				{
+//					$value = $field['default_value'];
+//				}
+//				else
+//				{
+//					$value = false;
+//				}
+//		 	}
+//
+//		}
+//
+//
+//		// if value was duplicated, it may now be a serialized string!
+//		$value = maybe_unserialize($value);
+//
+//
+//		// apply filters
+//		$value = apply_filters('acf_load_value', $value, $field, $post_id );
+//
+//		$keys = array('type', 'name', 'key');
+//		foreach( $keys as $key )
+//		{
+//			if( isset($field[ $key ]) )
+//			{
+//				$value = apply_filters('acf_load_value-' . $field[ $key ], $value, $field, $post_id);
+//			}
+//		}
+//
+//
+//
+//		return $value;
+//	}
 	
 	
 	/*--------------------------------------------------------------------------------------
@@ -285,18 +285,60 @@ class acf_Field
     *-------------------------------------------------------------------------------------*/
     function update_value_subfields( $field_value )
     {
+        $sub_fields = array();
+
+        if( $field_value )
+        {
 //        phplog('sola-acf.php','............filter subfields..............................'  );
 //        phplog('sola-acf.php','PRE FILTER $field_value=', $field_value  );
 
-        if( $field_value['acfcloneindex'] )
-        {
-            unset( $field_value['acfcloneindex'] );
+            /* from eg
+            1 =>
+            array (
+                "text" => "aaa",
+                "num" => "1",
+            ),
+            "1358216806848" =>
+            array (
+                "text" => "bbb",
+                "num" => "2",
+            ),
+            "acfcloneindex" =>
+            array (
+                "text" => "default text",
+                "num" => "0",
+            ),
+            */
+
+            if( $field_value['acfcloneindex'] )
+            {
+                unset( $field_value['acfcloneindex'] );
+            }
+
+            // loop through rows
+            foreach( $field_value as $sub_field_row )
+            {
+                $sub_fields[] = $sub_field_row;
+            }
+
+            /* to eg
+            0 =>
+            array (
+                "text" => "aaa",
+                "num" => "1",
+            ),
+            1 =>
+            array (
+                "text" => "bbb",
+                "num" => "2",
+            ),
+            */
+
+//            phplog('sola-acf.php','POST FILTER $sub_fields=', $sub_fields  );
+//            phplog('sola-acf.php','..........................................................'  );
         }
 
-//        phplog('sola-acf.php','POST FILTER $field_value=', $field_value  );
-//        phplog('sola-acf.php','..........................................................'  );
-
-        return $field_value;
+        return $sub_fields;
     }
     /*--------------------------------------------------------------------------------------
 	*
@@ -365,15 +407,11 @@ class acf_Field
             }
         }
 
-
-
         // update choices
         $field['choices'] = $new_choices;
 
-
         // return updated field
         return $field;
-
     }
 	
 }

@@ -326,6 +326,7 @@ class acf_Repeater extends acf_Field
 	{
 		// vars
 		$fields_names = array();
+
 		$defaults = array(
 			'row_limit'		=>	'',
 			'row_min'		=>	0,
@@ -352,17 +353,11 @@ class acf_Repeater extends acf_Field
 			'instructions' =>	'',
 		);
 
-		
-		// get name of all fields for use in field type
-		foreach($this->acf->fields as $f)
-		{
-			if( $f->name )
-			{
-				$fields_names[$f->name] = $f->title;
-			}
-		}
-		unset( $fields_names['tab'] );
-		
+        // wdh
+        $fields_names = $this->acf->get_field_type_titles();
+
+        unset( $fields_names['tab'] );
+
 		?>
 <tr class="field_option field_option_<?php echo $this->type; ?> field_option_<?php echo $this->type; ?>_fields">
 	<td class="label">
@@ -616,7 +611,7 @@ class acf_Repeater extends acf_Field
 	
 	function acf_save_field($field)
 	{
-        phplog('repeater.php','$field=',$field );
+//        phplog('repeater.php','PRE $field=',$field );
 
 		// format sub_fields
 		if( $field['sub_fields'] )
@@ -639,14 +634,17 @@ class acf_Repeater extends acf_Field
 				$sub_field['order_no'] = $i;
 				$sub_field['key'] = $key;
 				
-				
+
+                // wdh :removed
 				// apply filters
-				$sub_field = apply_filters('acf_save_field', $sub_field );
-				$sub_field = apply_filters('acf_save_field-' . $sub_field['type'], $sub_field );
+//				$sub_field = apply_filters('acf_save_field', $sub_field );
+//				$sub_field = apply_filters('acf_save_field-' . $sub_field['type'], $sub_field );
+                // wdh : added
+                $sub_field = $this->acf->apply_save_field_filters($sub_field);
 
                 // ********************************
                 // ** important **
-                // wdh : save field via key = name not 'field_n' key
+                // wdh : save field via 'name' not 'field_n' key
                 // wdh : removed
 //				$sub_fields[ $sub_field['key'] ] = $sub_field;
                 // wdh : added
@@ -659,8 +657,9 @@ class acf_Repeater extends acf_Field
 			// update sub fields
 			$field['sub_fields'] = $sub_fields;
 		}
-		
-		
+
+//        phplog('repeater.php','POST $field=',$field );
+
 		// return updated repeater field
 		return $field;
 
@@ -690,47 +689,47 @@ class acf_Repeater extends acf_Field
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function update_value($post_id, $field, $value)
-	{
-		$total = 0;
-
-		if($value)
-		{
-			// remove dummy field
-			unset($value['acfcloneindex']);
-
-			$i = -1;
-
-			// loop through rows
-			foreach($value as $row)
-			{
-				$i++;
-
-				// increase total
-				$total++;
-
-				// loop through sub fields
-				foreach($field['sub_fields'] as $sub_field)
-				{
-					// get sub field data
-					$v = isset($row[$sub_field['key']]) ? $row[$sub_field['key']] : '';
-
-					// add to parent value
-					//$parent_value[$i][$sub_field['name']] = $v;
-
-					// update full name
-					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
-
-					// save sub field value
-					$this->acf->update_value($post_id, $sub_field, $v);
-				}
-			}
-		}
-
-		parent::update_value($post_id, $field, $total);
-
-	}
-	
+//	function update_value($post_id, $field, $value)
+//	{
+//		$total = 0;
+//
+//		if($value)
+//		{
+//			// remove dummy field
+//			unset($value['acfcloneindex']);
+//
+//			$i = -1;
+//
+//			// loop through rows
+//			foreach($value as $row)
+//			{
+//				$i++;
+//
+//				// increase total
+//				$total++;
+//
+//				// loop through sub fields
+//				foreach($field['sub_fields'] as $sub_field)
+//				{
+//					// get sub field data
+//					$v = isset($row[$sub_field['key']]) ? $row[$sub_field['key']] : '';
+//
+//					// add to parent value
+//					//$parent_value[$i][$sub_field['name']] = $v;
+//
+//					// update full name
+//					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
+//
+//					// save sub field value
+//					$this->acf->update_value($post_id, $sub_field, $v);
+//				}
+//			}
+//		}
+//
+//		parent::update_value($post_id, $field, $total);
+//
+//	}
+//
 	
 	/*--------------------------------------------------------------------------------------
 	*

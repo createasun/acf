@@ -12,7 +12,7 @@ global $post;
 		
 		
 // vars
-$location = $this->parent->get_acf_location($post->ID);
+$location = $this->acf->get_acf_location($post->ID);
 
 
 // at lease 1 location rule
@@ -69,7 +69,7 @@ if( empty($location['rules']) )
 							
 
 							// validate
-							if($this->parent->is_field_unlocked('options_page'))
+							if($this->acf->is_field_unlocked('options_page'))
 							{
 								$choices[__("Options Page",'acf')]['options_page'] = __("Options Page",'acf');
 							}
@@ -83,12 +83,12 @@ if( empty($location['rules']) )
 								'optgroup' => true,
 							);
 							
-							$this->parent->create_field($args);							
+							$this->acf->create_field($args);							
 							
 						?></td>
 						<td class="operator"><?php 	
 							
-							$this->parent->create_field(array(
+							$this->acf->create_field(array(
 								'type'	=>	'select',
 								'name'	=>	'location[rules]['.$k.'][operator]',
 								'value'	=>	$rule['operator'],
@@ -121,7 +121,7 @@ if( empty($location['rules']) )
 				</table>
 				<ul class="hl clearfix">
 					<li style="padding:4px 4px 0 0;"><?php _e("match",'acf'); ?></li>
-					<li><?php $this->parent->create_field(array(
+					<li><?php $this->acf->create_field(array(
 									'type'	=>	'select',
 									'name'	=>	'location[allorany]',
 									'value'	=>	$location['allorany'],

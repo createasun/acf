@@ -17,7 +17,7 @@ $fields_names = array();
 
 
 // get fields
-$fields = $this->parent->get_acf_fields( $post->ID );
+$fields = $this->acf->get_acf_fields( $post->ID );
 
 
 // add clone
@@ -37,15 +37,7 @@ $fields[] = array(
 );
 
 
-// get name of all fields for use in field type drop down
-foreach($this->parent->fields as $f)
-{
-	// wdh : changed 'name' to 'type' for better readability
-    if( $f->type )
-	{
-		$fields_names[$f->type] = $f->title;
-	}
-}
+$fields_names = $this->acf->get_field_type_titles();
 
 
 // conditional logic dummy data
@@ -130,7 +122,7 @@ $conditional_logic_rule = array(
 							</td>
 							<td>
 								<?php 
-								$this->parent->create_field(array(
+								$this->acf->create_field(array(
 									'type'	=>	'text',
 									'name'	=>	'fields['.$field['key'].'][label]',
 									'value'	=>	$field['label'],
@@ -146,7 +138,7 @@ $conditional_logic_rule = array(
 							</td>
 							<td>
 								<?php 
-								$this->parent->create_field(array(
+								$this->acf->create_field(array(
 									'type'	=>	'text',
 									'name'	=>	'fields['.$field['key'].'][name]',
 									'value'	=>	$field['name'],
@@ -159,7 +151,7 @@ $conditional_logic_rule = array(
 							<td class="label"><label><span class="required">*</span><?php _e("Field Type",'acf'); ?></label></td>
 							<td>
 								<?php 
-								$this->parent->create_field(array(
+								$this->acf->create_field(array(
 									'type'		=>	'select',
 									'name'		=>	'fields['.$field['key'].'][type]',
 									'value'		=>	$field['type'],
@@ -173,7 +165,7 @@ $conditional_logic_rule = array(
 							<p class="description"><?php _e("Instructions for authors. Shown when submitting data",'acf'); ?></p></td>
 							<td>
 								<?php 
-								$this->parent->create_field(array(
+								$this->acf->create_field(array(
 									'type'	=>	'textarea',
 									'name'	=>	'fields['.$field['key'].'][instructions]',
 									'value'	=>	$field['instructions'],
@@ -185,7 +177,7 @@ $conditional_logic_rule = array(
 							<td class="label"><label><?php _e("Required?",'acf'); ?></label></td>
 							<td>
 								<?php 
-								$this->parent->create_field(array(
+								$this->acf->create_field(array(
 									'type'	=>	'radio',
 									'name'	=>	'fields['.$field['key'].'][required]',
 									'value'	=>	$field['required'],
@@ -200,9 +192,9 @@ $conditional_logic_rule = array(
 						</tr>
 						<?php 
 						
-						if( isset($this->parent->fields[ $field['type'] ]) )
+						if( isset($this->acf->fields[ $field['type'] ]) )
 						{
-							$this->parent->fields[$field['type']]->create_options($field['key'], $field);
+							$this->acf->fields[$field['type']]->create_options($field['key'], $field);
 						}
 						
 						?>
@@ -210,7 +202,7 @@ $conditional_logic_rule = array(
 							<td class="label"><label><?php _e("Conditional Logic",'acf'); ?></label></td>
 							<td>
 								<?php 
-								$this->parent->create_field(array(
+								$this->acf->create_field(array(
 									'type'	=>	'radio',
 									'name'	=>	'fields['.$field['key'].'][conditional_logic][status]',
 									'value'	=>	$field['conditional_logic']['status'],
@@ -253,7 +245,7 @@ $conditional_logic_rule = array(
 												</td>
 												<td width="25%">
 													<?php 
-													$this->parent->create_field(array(
+													$this->acf->create_field(array(
 														'type'	=>	'select',
 														'name'	=>	'fields['.$field['key'].'][conditional_logic][rules][' . $rule_i . '][operator]',
 														'value'	=>	$rule['operator'],
@@ -278,7 +270,7 @@ $conditional_logic_rule = array(
 									
 									<ul class="hl clearfix">
 										<li style="padding:4px 4px 0 0;"><?php _e("Show this field when",'acf'); ?></li>
-										<li><?php $this->parent->create_field(array(
+										<li><?php $this->acf->create_field(array(
 												'type'	=>	'select',
 												'name'	=>	'fields['.$field['key'].'][conditional_logic][allorany]',
 												'value'	=>	$field['conditional_logic']['allorany'],
