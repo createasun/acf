@@ -26,7 +26,7 @@ class acf_Gallery extends acf_Field
 
 
 //      add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
-//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
+        add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
 //      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
 		
 		// actions
@@ -269,12 +269,98 @@ class acf_Gallery extends acf_Field
 		<?php
 	}
 
-	
+    /*--------------------------------------------------------------------------------------
+    *
+    *	acf_load_value
+    *   adapted from Elliots 'get_value' now used as an on 'load_value' filter
+    *
+    *	@params
+    *	- $value : to be filtered
+    *
+    *	@author Elliot Condon / Wayne D Harris
+    *	@since 2.2.0
+    *
+    *-------------------------------------------------------------------------------------*/
+
+    function acf_load_value($value)
+    {
+        $new_value = array();
+
+        // empty?
+        if( empty($value) )
+        {
+            return $value;
+        }
+
+        // find attachments (DISTINCT POSTS)
+        $attachments = get_posts(array(
+            'post_type' => 'attachment',
+            'numberposts' => -1,
+            'post_status' => null,
+            'post__in' => $value,
+        ));
+
+        $ordered_attachments = array();
+        foreach( $attachments as $attachment)
+        {
+            // create array to hold value data
+            $ordered_attachments[ $attachment->ID ] = array(
+                'id' => $attachment->ID,
+                'alt' => get_post_meta($attachment->ID, '_wp_attachment_image_alt', true),
+                'title' => $attachment->post_title,
+                'caption' => $attachment->post_excerpt,
+                'description' => $attachment->post_content,
+            );
+        }
+
+
+        // override value array with attachments
+        foreach( $value as $v)
+        {
+            if( isset($ordered_attachments[ $v ]) )
+            {
+                $new_value[] = $ordered_attachments[ $v ];
+            }
+        }
+
+
+        /*
+        // format attachments
+        $ordered_attachments = array();
+        foreach( $attachments as $attachment )
+        {
+            $ordered_attachments[ $attachment->ID ] = $attachment;
+        }
+
+
+        // update value with corisponding attachments
+        foreach( $value as $k => $v)
+        {
+            // get the attachment onject for this value (attachment id)
+            $attachment = $ordered_attachments[ $v ];
+
+            // create array to hold value data
+            $value[ $k ] = array(
+                'id' => $attachment->ID,
+                'alt' => get_post_meta($attachment->ID, '_wp_attachment_image_alt', true),
+                'title' => $attachment->post_title,
+                'caption' => $attachment->post_excerpt,
+                'description' => $attachment->post_content,
+            );
+        }
+
+        */
+
+        // return value
+        return $new_value;
+    }
 	/*--------------------------------------------------------------------------------------
 	*
 	*	get_value
 	*	- called from the edit page to get the value of your field. This function is useful
 	*	if your field needs to collect extra data for your create_field() function.
+	 *
+	 *  *** wdh : redundant see acf_load_value ***
 	*
 	*	@params
 	*	- $post_id (int) - the post ID which your value is attached to
@@ -284,84 +370,7 @@ class acf_Gallery extends acf_Field
 	*	@since 2.2.0
 	* 
 	*-------------------------------------------------------------------------------------*/
-	
-	function get_value($post_id, $field)
-	{
-		// get value
-		$value = parent::get_value($post_id, $field);
-		$new_value = array();
-		
-		
-		// empty?
-		if( empty($value) )
-		{
-			return $value;
-		}
-		
-		
-		// find attachments (DISTINCT POSTS)
-		$attachments = get_posts(array(
-			'post_type' => 'attachment',
-			'numberposts' => -1,
-			'post_status' => null,
-			'post__in' => $value,
-		));
-		
-		$ordered_attachments = array();
-		foreach( $attachments as $attachment)
-		{
-			// create array to hold value data
-			$ordered_attachments[ $attachment->ID ] = array(
-				'id' => $attachment->ID,
-				'alt' => get_post_meta($attachment->ID, '_wp_attachment_image_alt', true),
-				'title' => $attachment->post_title,
-				'caption' => $attachment->post_excerpt,
-				'description' => $attachment->post_content,
-			);
-		}
-		
-		
-		// override value array with attachments
-		foreach( $value as $v)
-		{
-			if( isset($ordered_attachments[ $v ]) )
-			{
-				$new_value[] = $ordered_attachments[ $v ];
-			}
-		}
-		
-		
-		/*
-		// format attachments
-		$ordered_attachments = array();
-		foreach( $attachments as $attachment )
-		{
-			$ordered_attachments[ $attachment->ID ] = $attachment;
-		}
-		
-		
-		// update value with corisponding attachments
-		foreach( $value as $k => $v)
-		{
-			// get the attachment onject for this value (attachment id)
-			$attachment = $ordered_attachments[ $v ];
-			
-			// create array to hold value data
-			$value[ $k ] = array(
-				'id' => $attachment->ID,
-				'alt' => get_post_meta($attachment->ID, '_wp_attachment_image_alt', true),
-				'title' => $attachment->post_title,
-				'caption' => $attachment->post_excerpt,
-				'description' => $attachment->post_content,
-			);
-		}
-		
-		*/
-		
-		// return value
-		return $new_value;	
-	}
-	
+
 	
 	/*--------------------------------------------------------------------------------------
 	*

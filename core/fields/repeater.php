@@ -21,10 +21,9 @@ class acf_Repeater extends acf_Field
 		$this->title = __("Repeater",'acf');
 
         add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
-//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
-//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
 
-        add_filter(ACF_UPDATE_VALUE_.TYPE_.$this->type,      array($this, 'update_value_subfields')    );
+        add_filter(ACF_LOAD_VALUE_.TYPE_.$this->type,      array($this, 'filter_value_repeater')    );
+        add_filter(ACF_UPDATE_VALUE_.TYPE_.$this->type,      array($this, 'filter_value_repeater')    );
 
    	}
 
@@ -136,24 +135,6 @@ class acf_Repeater extends acf_Field
             $sub_value = isset($sub_field['default_value']) ? $sub_field['default_value'] : false;
             $field['value']['acfcloneindex'][ $sub_field['name'] ] = $sub_value;
         }
-
-        // *********************
-//        // wdh : added : replace unique keys set in input-actions.js/repeater_add_field() with integer indexes
-//        // todo : change order with new index ??
-//        if( $field['value'] )
-//        {
-//            $keys   = array_keys( $field['value'] );
-//            $values = array_values( $field['value'] );
-//
-//            for ( $k=0; $k < count($field['value']); $k++ )
-//            {
-//                $keys[$k] = ( (string)$keys[$k] == 'acfcloneindex' ) ? 'acfcloneindex' : $k;
-//            }
-//
-//            $field['value'] = array_combine($keys, $values);
-//
-//        }
-        // *********************
 
         ?>
     <div class="repeater" data-min_rows="<?php echo $field['row_min']; ?>" data-max_rows="<?php echo $field['row_limit']; ?>">
@@ -356,6 +337,7 @@ class acf_Repeater extends acf_Field
         // wdh
         $fields_names = $this->acf->get_field_type_titles();
 
+        // no tabs in repeater
         unset( $fields_names['tab'] );
 
 		?>
@@ -601,7 +583,7 @@ class acf_Repeater extends acf_Field
 
 	/*--------------------------------------------------------------------------------------
 	*
-	*	pre_save_field
+	*	acf_save_field
 	*	- called just before saving the field to the database.
 	*
 	*	@author Elliot Condon
@@ -628,12 +610,10 @@ class acf_Repeater extends acf_Field
 			foreach( $field['sub_fields'] as $key => $sub_field )   // wdh : changed $f to $sub_field
 			{
 				$i++;
-				
-				
+
 				// order
 				$sub_field['order_no'] = $i;
 				$sub_field['key'] = $key;
-				
 
                 // wdh :removed
 				// apply filters
@@ -650,10 +630,7 @@ class acf_Repeater extends acf_Field
                 // wdh : added
                 $sub_fields[ $sub_field['name'] ] = $sub_field;
                 // ********************************
-
 			}
-
-
 			// update sub fields
 			$field['sub_fields'] = $sub_fields;
 		}
@@ -667,18 +644,69 @@ class acf_Repeater extends acf_Field
 
     /*--------------------------------------------------------------------------------------
     *
-    *	pre_save_field
-    *	- called just before saving the field to the database.
+    *	filter_value_repeater
+    *   called on read and update
     *
-    *	@author Elliot Condon
-    *	@since 2.2.0
+    *   @author Wayne D Harris
+    *	@since
     *
     *-------------------------------------------------------------------------------------*/
-
-    function acf_update_value($value)
+    function filter_value_repeater( $field_value )
     {
+        $sub_fields = array();
 
+        if( $field_value )
+        {
+//        phplog('sola-acf.php','............filter subfields..............................'  );
+//        phplog('sola-acf.php','PRE FILTER $field_value=', $field_value  );
 
+            /* from eg
+            1 =>
+            array (
+                "text" => "aaa",
+                "num" => "1",
+            ),
+            "1358216806848" =>
+            array (
+                "text" => "bbb",
+                "num" => "2",
+            ),
+            "acfcloneindex" =>
+            array (
+                "text" => "default text",
+                "num" => "0",
+            ),
+            */
+
+            if( $field_value['acfcloneindex'] )
+            {
+                unset( $field_value['acfcloneindex'] );
+            }
+
+            // loop through rows
+            foreach( $field_value as $sub_field_row )
+            {
+                $sub_fields[] = $sub_field_row;
+            }
+
+            /* to eg
+            0 =>
+            array (
+                "text" => "aaa",
+                "num" => "1",
+            ),
+            1 =>
+            array (
+                "text" => "bbb",
+                "num" => "2",
+            ),
+            */
+
+//            phplog('sola-acf.php','POST FILTER $sub_fields=', $sub_fields  );
+//            phplog('sola-acf.php','..........................................................'  );
+        }
+
+        return $sub_fields;
     }
 	/*--------------------------------------------------------------------------------------
 	*

@@ -39,7 +39,9 @@ class acf_Tab extends acf_Field
 	
 	function create_field($field)
 	{
-		echo '<div class="acf-tab" data-id="' . $field['type'] . '">' . $field['label'] . '</div>';
+		//wdh : changed $field['key'] to $field['slug']
+
+        echo '<div class="acf-tab" data-id="' . $field['slug'] . '">' . $field['label'] . '</div>';
 	}
 	
 	

@@ -172,85 +172,75 @@ class acf_input
 		// shopp
 		if( $pagenow == "admin.php" && isset( $_GET['page'] ) && $_GET['page'] == "shopp-products" && isset( $_GET['id'] ) )
 		{
-			$typenow = "shopp_product";
+            $post_type = "shopp_product";
 		}
-		
-		
-		// vars
-		$post_id = 0;
-		
-		if( $post )
-		{
-			$post_id = $post->ID;
-		}
-		
-			
-		// get style for page
-		$show_field_group_ids = $this->acf->get_input_metabox_ids( array( 'post_id' => $post_id, 'post_type' => $typenow ), false);
-
-		$style = isset($show_field_group_ids[0]) ? $this->get_input_style($show_field_group_ids[0]) : '';
-
-		echo '<style type="text/css" id="acf_style" >' .$style . '</style>';
-		
-
-		// Style
-		echo '<style type="text/css">.acf_postbox, .postbox[id*="acf_"] { display: none; }</style>';
-		
-		
-		// Javascript
-		echo '<script type="text/javascript">acf.post_id = ' . $post_id . '; acf.nonce = "' . wp_create_nonce( 'acf_nonce' ) . '";</script>';
-		
-		
-		// add user js + css
-		do_action('acf_head-input');
-		
-		
-		// get acf's
-		$field_groups = $this->acf->get_field_groups(); //wdh : changed '$acfs' to '$field_group' - better naming
-		
-		if($field_groups)
-		{
-			foreach($field_groups as $field_group)
-			{
-				// hide / show
-				$show = in_array($field_group['id'], $show_field_group_ids) ? 1 : 0;
-
-                $this->add_acf_meta_box( $field_group, $field_group['name'], $typenow, $show );
+        else
+        {
+            $post_type = $typenow;
+        }
 
 
-//				$priority = 'high';
-//				if( $field_group['options']['position'] == 'side' )
-//				{
-//					$priority = 'core';
-//				}
-//
-//
-//				// add meta box
-//				add_meta_box(
-//                    'acf_' .$field_group['name'],       //metabox id : wdh : removed 'acf_' . $field_group['id'],
-//                    // wdh : ** note: metabox id must start with 'acf_' for input-actions.js
-//					__( $field_group['title'], 'acf' ), //metabox title : wdh : added localisation
-//					array($this, 'meta_box_input'),
-//					$typenow,
-//					$field_group['options']['position'],
-//					$priority,
-//					array(
-//                        'field_group_post_id'   => $field_group['id'],      // **** wdh: added
-//                        'field_group_post_name' => $field_group['name'],    // **** wdh: added
-//                        'fields'                => $field_group['fields'],
-//                        'options'               => $field_group['options'],
-////                        'field_group_values_key'=> $field_group_values_key;
-//                        'show'                  => $show,
-//                        'post_id'               => $post->ID,
-//
-//                    )
-//				);
-				
-			}
-			// foreach($field_groups as $field_group)
-		}
-		// if($field_groups)
+        $this->render_meta_boxes( $post, $post_type  );
+
+
 	}
+    /*--------------------------------------------------------------------------------------
+    *  render_meta_boxes
+    *
+    *  @description:
+    *  @since
+    *  @author: Wayne D Harris adapted from Elliot Condon
+    *-------------------------------------------------------------------------------------*/
+    function render_meta_boxes( $post, $post_type  )
+    {
+        $post_id = ($post) ? $post->ID : 0;
+
+        // get style for page
+        $show_field_group_ids = $this->acf->get_input_metabox_ids( array( 'post_id' => $post_id, 'post_type' => $post_type ), false);
+
+        $style = isset($show_field_group_ids[0]) ? $this->get_input_style($show_field_group_ids[0]) : '';
+
+        echo '<style type="text/css" id="acf_style" >' .$style . '</style>';
+
+
+        // Style
+        echo '<style type="text/css">.acf_postbox, .postbox[id*="acf_"] { display: none; }</style>';
+
+
+        // Javascript
+        echo '<script type="text/javascript">acf.post_id = ' . $post_id . '; acf.nonce = "' . wp_create_nonce( 'acf_nonce' ) . '";</script>';
+
+
+        // add user js + css
+        do_action('acf_head-input');
+
+
+        // wdh : ?? is there any reason we need to display hidden metaboxes here ??
+        // wdh : simplified down to just displaying relevant metaboxes for this page/post
+
+        foreach($show_field_group_ids as $field_group_id)
+        {
+            $field_group = $this->acf->get_acf_field_group($field_group_id);
+
+            $this->add_acf_meta_box( $field_group, $field_group['name'], $post_type );
+        }
+
+//        // get acf's
+//        $field_groups = $this->acf->get_field_groups(); //wdh : changed '$acfs' to '$field_group' - better naming
+//
+//        if($field_groups)
+//        {
+//            foreach($field_groups as $field_group)
+//            {
+//                // hide / show
+//                $show = in_array($field_group['id'], $show_field_group_ids) ? 1 : 0;
+//
+//                $this->add_acf_meta_box( $field_group, $field_group['name'], $post_type, $show );
+//
+//            }
+//        }
+
+    }
     /*--------------------------------------------------------------------------------------
     *  add_acf_meta_box
     *
@@ -315,7 +305,7 @@ class acf_input
 		{
 			foreach($field_groups as $field_group)
 			{
-                if($field_group['id'] != $field_group_id) continue;
+                if($field_group['id'] != $field_group_id) { continue; }
 
                 $options_hide_array = $field_group['options']['hide_on_screen'];
 
@@ -408,7 +398,7 @@ class acf_input
 			echo '<input type="hidden" name="save_input" value="true" />';
 
             // ***********************************
-            // wdh : additional feature sent in $_POST via name/value pairs
+            // wdh : additional hidden data sent in $_POST via name/value pairs
             // allow data from this metabox to be posted to a different post than its acf
 
             $field_group_values_key = $options['field_group_values_key'];

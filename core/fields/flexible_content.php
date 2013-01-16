@@ -20,11 +20,10 @@ class acf_Flexible_content extends acf_Field
         $this->type = 'flexible_content';
 		$this->title = __("Flexible Content",'acf');
 
-        add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,       array($this, 'acf_save_field')   );
-//      add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,       array($this, 'acf_load_value')   );
-//      add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,     array($this, 'acf_update_value') );
+        add_filter( ACF_SAVE_FIELD_.TYPE_.$this->type,      array($this, 'acf_save_field')   );
 
-        add_filter(ACF_UPDATE_VALUE_.TYPE_.$this->type,      array($this, 'update_value_subfields')    );
+        add_filter( ACF_LOAD_VALUE_.TYPE_.$this->type,      array($this, 'filter_value_flexible_content')   );
+        add_filter( ACF_UPDATE_VALUE_.TYPE_.$this->type,    array($this, 'filter_value_flexible_content')    );
 		
    	}
 
@@ -627,69 +626,81 @@ class acf_Flexible_content extends acf_Field
 	</td>
 </tr><?php
   	}
-	
 
+    /*--------------------------------------------------------------------------------------
+    *
+    *	filter_value_flexible_content
+    *   called on read and update
+    *
+    *   @author Wayne D Harris
+    *	@since
+    *
+    *-------------------------------------------------------------------------------------*/
+    function filter_value_flexible_content ( $values )
+    {
+//        phplog('sola-acf.php','====================================================');
+//        phplog('sola-acf.php','PRE $values=',$values );
+//        phplog('sola-acf.php','----------------------------------------------------');
+
+        /*
+        PRE $values= array (
+            "acfcloneindex" =>
+            array (
+                "acf_fc_layout" => "component2",
+                "comp1_text1" => "dd",
+                "comp1_text2" => ,
+                "comp2_text1" => "dd",
+            ),
+            0 =>
+            array (
+                "acf_fc_layout" => "component1",
+                "comp1_text1" => "aaa",
+                "comp1_text2" => "bbb",
+            ),
+            "1358317589927" =>
+            array (
+                "acf_fc_layout" => "component1",
+                "comp1_text1" => "ccc",
+                "comp1_text2" => "ddd",
+            ),
+	    )
+        */
+        unset( $values['acfcloneindex'] );
+
+        $new_values = array();
+
+        foreach( $values as $key => $value)
+        {
+            $new_values[] = $value;
+
+        }
+        /*
+        POST $new_values= array (
+            0 =>
+            array (
+                "acf_fc_layout" => "component1",
+                "comp1_text1" => "aaa",
+                "comp1_text2" => "bbb",
+            ),
+            1 =>
+            array (
+                "acf_fc_layout" => "component1",
+                "comp1_text1" => "ccc",
+                "comp1_text2" => "ddd",
+            ),
+        )
+        */
+//        phplog('sola-acf.php','POST $new_values=',$new_values );
+//        phplog('sola-acf.php','======================================================');
+
+        return $new_values;
+    }
+
+
+	
 	/*--------------------------------------------------------------------------------------
 	*
-	*	update_value
-	*
-	*	@author Elliot Condon
-	*	@since 2.2.0
-	* 
-	*-------------------------------------------------------------------------------------*/
-	
-	function update_value($post_id, $field, $value)
-	{
-		$sub_fields = array();
-
-		foreach($field['layouts'] as $layout)
-		{
-			foreach($layout['sub_fields'] as $sub_field)
-			{
-				$sub_fields[$sub_field['key']] = $sub_field;
-			}
-		}
-
-		$total = array();
-
-		if($value)
-		{
-			// remove dummy field
-			unset($value['acfcloneindex']);
-
-			$i = -1;
-
-			// loop through rows
-			foreach($value as $row)
-			{
-				$i++;
-
-				// increase total
-				$total[] = $row['acf_fc_layout'];
-				unset($row['acf_fc_layout']);
-
-				// loop through sub fields
-				foreach($row as $field_key => $value)
-				{
-					$sub_field = $sub_fields[$field_key];
-
-					// update full name
-					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
-
-					// save sub field value
-					$this->acf->update_value($post_id, $sub_field, $value);
-				}
-			}
-		}
-
-		parent::update_value($post_id, $field, $total);
-
-	}
-	
-	
-	/*--------------------------------------------------------------------------------------
-	*
-	*	pre_save_field
+	*	acf_save_field
 	*	- called just before saving the field to the database.
 	*
 	*	@author Elliot Condon
@@ -699,67 +710,325 @@ class acf_Flexible_content extends acf_Field
 	
 	function acf_save_field( $field )
 	{
-        phplog('sola-acf.php','$field = ',$field );
+//        phplog('sola-acf.php','*****************************************');
+//        phplog('sola-acf.php','PRE $field = ',$field );
+//        phplog('sola-acf.php','*****************************************');
+
+        /* eg
+        PRE $field =  array (
+		"label" => "content",
+		"name" => "content",
+		"type" => "flexible_content",
+		"layouts" =>
+		array (
+			0 =>
+			array (
+				"label" => "component1",
+				"name" => "component1",
+				"sub_fields" =>
+				array (
+					"field_82" =>
+					array (
+						"label" => "comp1 text1",
+						"name" => "comp1_text1",
+						"type" => "text",
+						..
+					),
+					"field_83" =>
+					array (
+						"label" => "comp1 text2",
+						"name" => "comp1_text2",
+						"type" => "text",
+						..
+					),
+					"field_clone" =>
+					array (
+						"label" => "New Field",
+						"name" => "new_field",
+						"type" => "text",
+						"..
+					),
+				),
+			),
+			"1358308723733" =>
+			array (
+				"label" => "component2",
+				"name" => "component2",
+				"sub_fields" =>
+				array (
+					"field_86" =>
+					array (
+						"label" => "comp2 text1",
+						"name" => "comp2_text1",
+						"type" => "text",
+						..
+					),
+					"field_clone" =>
+					array (
+						"label" => "New Field",
+						"name" => "new_field",
+						"type" => "text",
+						..
+					),
+				),
+			),
+		),
+		..
+		"key" => "field_81",
+
+        */
 
 		// format sub_fields
 		if($field['layouts'])
 		{
+            $layouts = array();
+
 			// loop through and save fields
 			foreach($field['layouts'] as $layout_key => $layout)
-			{				
-			
+			{
+//                phplog('sola-acf.php','...................................');
+//                phplog('sola-acf.php','$layout_key = ',$layout_key );
+//                phplog('sola-acf.php','$layout = ',$layout );
+
 				if( $layout['sub_fields'] )
 				{
 					// remove dummy field
 					unset( $layout['sub_fields']['field_clone'] );
-				
-				
+
 					// loop through and save fields
 					$i = -1;
 					$sub_fields = array();
-					
-					
-					foreach( $layout['sub_fields'] as $key => $f )
+
+					foreach( $layout['sub_fields'] as $key => $sub_field ) // wdh : changed $f to $sub_field
 					{
 						$i++;
-						
-						
+
 						// order
-						$f['order_no'] = $i;
-						$f['key'] = $key;
-						
-						
-						// apply filters
-						$f = apply_filters('acf_save_field', $f );
-						$f = apply_filters('acf_save_field-' . $f['type'], $f );
+						$sub_field['order_no'] = $i;
+						$sub_field['key'] = $key;
+
+                        // wdh :removed
+                        // apply filters
+//						$sub_field = apply_filters('acf_save_field', $sub_field );
+//						$sub_field = apply_filters('acf_save_field-' . $sub_field['type'], $sub_field );
+                        // wdh : added
+                        $sub_field = $this->acf->apply_save_field_filters($sub_field);
 
                         // ********************************
                         // ** important **
                         // wdh : save field via key = name not 'field_n' key
                         // wdh : removed
-//				        $sub_fields[ $f['key'] ] = $f;
+//				        $sub_fields[ $sub_field['key'] ] = $sub_field;
                         // wdh : added
-                        $sub_fields[ $f['name'] ] = $f;
+                        $sub_fields[ $sub_field['name'] ] = $sub_field;
                         // ********************************
-
-						
 					}
 					
 					$layout['sub_fields'] = $sub_fields;
 				}
-				
-				// update $layout
-				$field['layouts'][ $layout_key ] = $layout;
-				
-			}
-		}
-		
-		// return updated repeater field
-		return $field;
 
+				// update $layout
+//				$field['layouts'][ $layout_key ] = $layout;
+
+                $layouts[ $layout['name'] ] = $layout;
+
+
+//                phplog('sola-acf.php','$field[layouts][ $layout_key ] = ',$field['layouts'][ $layout_key ] );
+			}
+
+            $field['layouts'] = $layouts;
+
+
+//            phplog('sola-acf.php','#########################################');
+//            phplog('sola-acf.php','POST $field[layouts] = ',$field['layouts'] );
+//            phplog('sola-acf.php','#########################################');
+
+		}
+
+//        phplog('sola-acf.php','*****************************************');
+//        phplog('sola-acf.php','POST $field = ',$field );
+//        phplog('sola-acf.php','*****************************************');
+
+        /*
+        POST $field =  array (
+        "label" => "content",
+        "name" => "content",
+        "type" => "flexible_content",
+		"layouts" =>
+        array (
+            "component1" =>
+            array (
+                "label" => "component1",
+                "name" => "component1",
+                "sub_fields" =>
+                array (
+                    "comp1_text1" =>
+                    array (
+                        "label" => "comp1 text1",
+                        "name" => "comp1_text1",
+                        "type" => "text",
+                        ..
+					),
+                    "comp1_text2" =>
+                    array (
+                        "label" => "comp1 text2",
+                        "name" => "comp1_text2",
+                        "type" => "text",
+						..
+					),
+                ),
+            ),
+            "component2" =>
+            array (
+                "label" => "component2",
+                "name" => "component2",
+                "sub_fields" =>
+                array (
+                    "comp2_text1" =>
+                    array (
+                        "label" => "comp2 text1",
+                        "name" => "comp2_text1",
+                        "type" => "text",
+						..
+					),
+                ),
+            ),
+        ),
+		..
+		"key" => "field_81",
+        */
+
+		// return updated field
+		return $field;
 	}
-	
-	
+
+
+
+
+
+
+
+    /*--------------------------------------------------------------------------------------
+    *
+    *	update_value
+    *
+    *	@author Elliot Condon
+    *	@since 2.2.0
+    *
+    *-------------------------------------------------------------------------------------*/
+
+//	function update_value($post_id, $field, $value)
+//	{
+//		$sub_fields = array();
+//
+//		foreach($field['layouts'] as $layout)
+//		{
+//			foreach($layout['sub_fields'] as $sub_field)
+//			{
+//				$sub_fields[$sub_field['key']] = $sub_field;
+//			}
+//		}
+//
+//		$total = array();
+//
+//		if($value)
+//		{
+//			// remove dummy field
+//			unset($value['acfcloneindex']);
+//
+//			$i = -1;
+//
+//			// loop through rows
+//			foreach($value as $row)
+//			{
+//				$i++;
+//
+//				// increase total
+//				$total[] = $row['acf_fc_layout'];
+//				unset($row['acf_fc_layout']);
+//
+//				// loop through sub fields
+//				foreach($row as $field_key => $value)
+//				{
+//					$sub_field = $sub_fields[$field_key];
+//
+//					// update full name
+//					$sub_field['name'] = $field['name'] . '_' . $i . '_' . $sub_field['name'];
+//
+//					// save sub field value
+//					$this->acf->update_value($post_id, $sub_field, $value);
+//				}
+//			}
+//		}
+//
+//		parent::update_value($post_id, $field, $total);
+//
+//	}
+
+    /*--------------------------------------------------------------------------------------
+	*
+	*	acf_load_value
+	*
+	*	@author Elliot Condon / Wayne D Harris
+	*	@since 2.2.0
+	*
+	*-------------------------------------------------------------------------------------*/
+
+//    function acf_load_value($field_value)
+//    {
+//        $layouts = array();
+//
+//        //change $field['layouts'] by key=index (with new uniqid from js) to $layouts by key=name
+//        foreach($field['layouts'] as $l)
+//        {
+//            $layouts[$l['name']] = $l;
+//        }
+//
+//        // vars
+//        $values = array();
+//
+//        $layout_order = false;
+//
+//
+//        // get total rows
+//        // $layout_order = layouts (or flex components) by name in array -> change to $layout_names
+//        $layout_order = parent::get_value($post_id, $field);
+//
+//
+//        if( !empty( $layout_order) )
+//        {
+//            $i = -1;
+//            // loop through rows create
+//            foreach($layout_order as $layout)
+//            {
+//                $i++;
+//                $values[$i]['acf_fc_layout'] = $layout;
+//
+//                // check if layout still exists
+//                if(isset($layouts[$layout]))
+//                {
+//                    // loop through sub fields
+//                    foreach($layouts[$layout]['sub_fields'] as $sub_field)
+//                    {
+//                        // store name
+//                        $field_name = $sub_field['name'];
+//
+//                        // update full name
+//                        $sub_field['name'] = $field['name'] . '_' . $i . '_' . $field_name;
+//
+//                        $values[$i][$field_name] = $this->acf->get_value($post_id, $sub_field);
+//                    }
+//                }
+//            }
+//        }
+//        else
+//        {
+//            $values = false;
+//        }
+//
+//        return $values;
+//    }
+
 	/*--------------------------------------------------------------------------------------
 	*
 	*	get_value
@@ -773,6 +1042,8 @@ class acf_Flexible_content extends acf_Field
 //	function get_value($post_id, $field)
 //	{
 //		$layouts = array();
+//
+//        //change $field['layouts'] by key=index (with new uniqid from js) to $layouts by key=name
 //		foreach($field['layouts'] as $l)
 //		{
 //			$layouts[$l['name']] = $l;
@@ -780,17 +1051,19 @@ class acf_Flexible_content extends acf_Field
 //
 //		// vars
 //		$values = array();
+//
 //		$layout_order = false;
 //
 //
 //		// get total rows
+//        // $layout_order = layouts (or flex components) by name in array -> change to $layout_names
 //		$layout_order = parent::get_value($post_id, $field);
 //
 //
 //		if( !empty( $layout_order) )
 //		{
 //			$i = -1;
-//			// loop through rows
+//			// loop through rows create
 //			foreach($layout_order as $layout)
 //			{
 //				$i++;

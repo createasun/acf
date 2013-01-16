@@ -698,7 +698,7 @@ class Acf
 	
 	function acf_load_field( $field )
 	{
-        phplog('acf.php','$field=',$field );
+//        phplog('acf.php','$field=',$field );
 
         if( !is_array($field) )
 		{

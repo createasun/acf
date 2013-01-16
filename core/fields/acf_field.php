@@ -274,72 +274,7 @@ class acf_Field
 		return $this->get_value($post_id, $field);
 	}
 
-    /*--------------------------------------------------------------------------------------
-    *
-    *	update_value_subfields
-    *   repeater/flexible content
-    *
-    *   @author Wayne D Harris
-    *	@since
-    *
-    *-------------------------------------------------------------------------------------*/
-    function update_value_subfields( $field_value )
-    {
-        $sub_fields = array();
 
-        if( $field_value )
-        {
-//        phplog('sola-acf.php','............filter subfields..............................'  );
-//        phplog('sola-acf.php','PRE FILTER $field_value=', $field_value  );
-
-            /* from eg
-            1 =>
-            array (
-                "text" => "aaa",
-                "num" => "1",
-            ),
-            "1358216806848" =>
-            array (
-                "text" => "bbb",
-                "num" => "2",
-            ),
-            "acfcloneindex" =>
-            array (
-                "text" => "default text",
-                "num" => "0",
-            ),
-            */
-
-            if( $field_value['acfcloneindex'] )
-            {
-                unset( $field_value['acfcloneindex'] );
-            }
-
-            // loop through rows
-            foreach( $field_value as $sub_field_row )
-            {
-                $sub_fields[] = $sub_field_row;
-            }
-
-            /* to eg
-            0 =>
-            array (
-                "text" => "aaa",
-                "num" => "1",
-            ),
-            1 =>
-            array (
-                "text" => "bbb",
-                "num" => "2",
-            ),
-            */
-
-//            phplog('sola-acf.php','POST FILTER $sub_fields=', $sub_fields  );
-//            phplog('sola-acf.php','..........................................................'  );
-        }
-
-        return $sub_fields;
-    }
     /*--------------------------------------------------------------------------------------
 	*
 	*	save_field_choices
