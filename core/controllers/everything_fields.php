@@ -3,7 +3,7 @@
 class acf_everything_fields 
 {
 
-	var $parent;
+	var $acf;
 	var $dir;
 	var $data;
 	
@@ -16,11 +16,11 @@ class acf_everything_fields
 	* 
 	*-------------------------------------------------------------------------------------*/
 	
-	function __construct($parent)
+	function __construct($acf)
 	{
 		// vars
-		$this->parent = $parent;
-		$this->dir = $parent->dir;
+		$this->acf = $acf;
+		$this->dir = $acf->dir;
 		
 		
 		// data for passing variables
@@ -193,7 +193,7 @@ class acf_everything_fields
 		
 		
 		// find metabox id's for this page
-		$this->data['metabox_ids'] = $this->parent->get_input_metabox_ids( $options , false );
+		$this->data['metabox_ids'] = $this->acf->get_input_metabox_ids( $options , false );
 
 		
 		// dont continue if no ids were found
@@ -418,7 +418,7 @@ class acf_everything_fields
 		
 			
 		// get acfs
-		$acfs = $this->parent->get_field_groups();
+		$field_groups = $this->acf->get_field_groups();
 		
 		
 		// layout
@@ -433,31 +433,31 @@ class acf_everything_fields
 		}
 		
 		
-		if($acfs)
+		if($field_groups)
 		{
-			foreach($acfs as $acf)
+			foreach($field_groups as $field_group)
 			{
 				// only add the chosen field groups
-				if( !in_array( $acf['id'], $options['metabox_ids'] ) )
+				if( !in_array( $field_group['id'], $options['metabox_ids'] ) )
 				{
 					continue;
 				}
 				
 				
 				// needs fields
-				if(!$acf['fields'])
+				if(!$field_group['fields'])
 				{
 					continue;
 				}
 				
 				$title = "";
-				if ( is_numeric( $acf['id'] ) )
+				if ( is_numeric( $field_group['id'] ) )
 			    {
-			        $title = get_the_title( $acf['id'] );
+			        $title = get_the_title( $field_group['id'] );
 			    }
 			    else
 			    {
-			        $title = apply_filters( 'the_title', $acf['title'] );
+			        $title = apply_filters( 'the_title', $field_group['title'] );
 			    }
 			    
 				
@@ -469,21 +469,52 @@ class acf_everything_fields
 				}
 				elseif( $layout == 'metabox' )
 				{
-					echo '<div class="postbox acf_postbox" id="acf_'. $acf['id'] .'">';
+					echo '<div class="postbox acf_postbox" id="acf_'. $field_group['id'] .'">';
 					echo '<div title="Click to toggle" class="handlediv"><br></div><h3 class="hndle"><span>' . $title . '</span></h3>';
 					echo '<div class="inside">';
 				}
 
+
+                //************************
+                //wdh : added
+                $field_group_values_key = $field_group['name'];
+                //filter field values
+
+
+
+                // todo !!!!!!!!!!!!!
+
+                $field_group_values = $this->acf->get_field_group_values( $options['page_type'], $post_id, $field_group_values_key, $field_group['id'] );
+
+
+
+
+
+
+
+                // filter, set defaults and clean
+                $field_config_value_pair = $this->acf->map_field_config_to_value( $field_group['fields'], $field_group_values['field_values'], ACF_LOAD_VALUE_, ACF_LOAD_FIELD_ );
+
+                //set caches of load value filtered results - we'll read from these now until an update
+                $field_group_values['field_values'] = $field_config_value_pair['value'];
+                $this->acf->set_cache( 'acf_field_group_values_'.$field_group_values_key, $field_group_values );
+                //************************
+
 				
 				// render
-				foreach($acf['fields'] as $field)
+				foreach($field_group['fields'] as $field)
 				{
 				
 					// if they didn't select a type, skip this field
 					if($field['type'] == 'null') continue;
-					
+
+                    //************************
+                    // wdh : removed
 					// set value
-					$field['value'] = $this->parent->get_value( $options['option_name'], $field);
+//					$field['value'] = $this->acf->get_value( $options['option_name'], $field);
+                    // wdh : added
+                    $field['value'] = $this->acf->get_field_value( $field_group_values_key, array( $field['slug'] ), $post_id, false, $field_group_post_id );
+                    //************************
 					
 					// required
 					if(!isset($field['required']))
@@ -511,7 +542,7 @@ class acf_everything_fields
 							echo '</p>';
 							
 							$field['name'] = 'fields[' . $field['key'] . ']';
-							$this->parent->create_field($field);
+							$this->acf->create_field($field);
 						
 						echo '</div>';
 					}
@@ -520,7 +551,7 @@ class acf_everything_fields
 						echo '<div id="acf-' . $field['name'] . '" class="form-field field field-' . $field['type'] . ' field-'.$field['key'] . $required_class . '">';
 							echo '<label for="fields[' . $field['key'] . ']">' . $field['label'] . $required_label . '</label>';	
 							$field['name'] = 'fields[' . $field['key'] . ']';
-							$this->parent->create_field($field);
+							$this->acf->create_field($field);
 							if($field['instructions']) echo '<p class="description">' . $field['instructions'] . '</p>';
 						echo '</div>';
 					}
@@ -530,7 +561,7 @@ class acf_everything_fields
 							echo '<th valign="top" scope="row"><label for="fields[' . $field['key'] . ']">' . $field['label'] . $required_label . '</label></th>';	
 							echo '<td>';
 								$field['name'] = 'fields[' . $field['key'] . ']';
-								$this->parent->create_field($field);
+								$this->acf->create_field($field);
 								
 								if($field['instructions']) echo '<p class="description">' . $field['instructions'] . '</p>';
 							echo '</td>';
@@ -553,9 +584,9 @@ class acf_everything_fields
 					echo '</div></div>';
 				}
 			}
-			// foreach($acfs as $acf)
+			// foreach($field_groups as $field_group)
 		}
-		// if($acfs)
+		// if($field_groups)
 		
 		// exit for ajax
 		die();

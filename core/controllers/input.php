@@ -222,6 +222,8 @@ class acf_input
         {
             $field_group = $this->acf->get_acf_field_group($field_group_id);
 
+            // $field_group_values_key for native acf is set as $field_group['name'].
+            // But note there is scope to dynamically add_acf_meta_boxes with unique $field_group_values_key
             $this->add_acf_meta_box( $field_group, $field_group['name'], $post_type );
         }
 
@@ -285,7 +287,69 @@ class acf_input
             )
 	    );
     }
+    /*--------------------------------------------------------------------------------------
+    *  meta_box_input
+    *
+    *
+    *  @description: add_acf_meta_box callback
+    *  @since 1.0.0
+    *  @created: 23/06/12
+    *-------------------------------------------------------------------------------------*/
 
+    function meta_box_input($post, $metabox)
+    {
+        // vars
+        $options = array(
+            'fields' => array(),
+            'options' => array(
+                'layout'	=>	'default'
+            ),
+            'show' => 0,
+            'post_id' => 0,
+        );
+        $options = array_merge( $options, $metabox['args'] );
+
+        // needs fields
+        if( $options['fields'] )
+        {
+            echo '<input type="hidden" name="save_input" value="true" />';
+
+            // ***********************************
+            // wdh : additional hidden data sent in $_POST via name/value pairs
+            // allow data from this metabox to be posted to a different post than its acf
+
+            $field_group_values_key = $options['field_group_values_key'];
+
+            echo '<input type="hidden" name="field_group_values_target_post_id['.$field_group_values_key.']" value="'.$options['post_id'].'"/>';
+
+            // save the field_group_post_name/id the metabox is using
+            echo '<input type="hidden" name="field_group_post_id['.$field_group_values_key.']" value="'.$options['field_group_post_id'].'"/>';
+            echo '<input type="hidden" name="field_group_post_name['.$field_group_values_key.']" value="'.$options['field_group_post_name'].'"/>';
+
+            // ***********************************
+
+            echo '<div class="options" data-layout="' . $options['options']['layout'] . '" data-show="' . $options['show'] . '" style="display:none"></div>';
+
+            if( $options['show'] )
+            {
+                // ***********************************
+                // wdh :  pass additional params
+
+                // wdh: removed
+//              $this->acf->render_fields_for_input( $options['fields'], $options['post_id'] );
+
+                // wdh: added
+                $this->acf->render_fields_for_input( $options['fields'], $options['post_id'], $field_group_values_key, $options['field_group_post_id'] );
+
+                // ***********************************
+            }
+            else
+            {
+                echo '<div class="acf-replace-with-fields"><div class="acf-loading"></div></div>';
+            }
+
+        }
+    }
     /*--------------------------------------------------------------------------------------
     *  get_input_style
     *
@@ -370,69 +434,7 @@ class acf_input
 	}
 
 
-    /*--------------------------------------------------------------------------------------
-    *  meta_box_input
-    *
-    *
-    *  @description: add_acf_meta_box callback
-    *  @since 1.0.0
-    *  @created: 23/06/12
-    *-------------------------------------------------------------------------------------*/
-	
-	function meta_box_input($post, $metabox)
-	{
-		// vars
-		$options = array(
-			'fields' => array(),
-			'options' => array(
-				'layout'	=>	'default'
-			),
-			'show' => 0,
-			'post_id' => 0,
-		);
-		$options = array_merge( $options, $metabox['args'] );
 
-		// needs fields
-		if( $options['fields'] )
-		{
-			echo '<input type="hidden" name="save_input" value="true" />';
-
-            // ***********************************
-            // wdh : additional hidden data sent in $_POST via name/value pairs
-            // allow data from this metabox to be posted to a different post than its acf
-
-            $field_group_values_key = $options['field_group_values_key'];
-
-            echo '<input type="hidden" name="field_group_values_target_post_id['.$field_group_values_key.']" value="'.$options['post_id'].'"/>';
-
-            // save the field_group_post_name/id the metabox is using
-            echo '<input type="hidden" name="field_group_post_id['.$field_group_values_key.']" value="'.$options['field_group_post_id'].'"/>';
-            echo '<input type="hidden" name="field_group_post_name['.$field_group_values_key.']" value="'.$options['field_group_post_name'].'"/>';
-
-            // ***********************************
-
-			echo '<div class="options" data-layout="' . $options['options']['layout'] . '" data-show="' . $options['show'] . '" style="display:none"></div>';
-			
-			if( $options['show'] )
-			{
-                // ***********************************
-                // wdh :  pass additional params
-
-                // wdh: removed
-//              $this->acf->render_fields_for_input( $options['fields'], $options['post_id'] );
-
-                // wdh: added
-                $this->acf->render_fields_for_input( $options['fields'], $options['post_id'], $field_group_values_key, $options['field_group_post_id'] );
-
-                // ***********************************
-			}
-			else
-			{
-				echo '<div class="acf-replace-with-fields"><div class="acf-loading"></div></div>';
-			}
-			
-		}
-	}
 
 
     /*--------------------------------------------------------------------------------------
