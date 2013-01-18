@@ -193,6 +193,8 @@ class acf_input
     *-------------------------------------------------------------------------------------*/
     function render_meta_boxes( $post, $post_type  )
     {
+        phplog('input.php',' $post = ',$post );
+
         $post_id = ($post) ? $post->ID : 0;
 
         // get style for page
