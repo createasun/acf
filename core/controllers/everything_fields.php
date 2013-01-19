@@ -62,32 +62,32 @@ class acf_everything_fields
 	*  @created: 23/06/12
 	*/
 	
-	function validate_page()
-	{
-		// global
-		global $pagenow;
-		
-		
-		// vars
-		$return = false;
-		
-		
-		// validate page
-		if( in_array( $pagenow, array( 'edit-tags.php', 'profile.php', 'user-new.php', 'user-edit.php', 'media.php' ) ) )
-		{
-			$return = true;
-		}
-				
-		
-		// validate page (Shopp)
-		if( $pagenow == "admin.php" && isset( $_GET['page'], $_GET['id'] ) && $_GET['page'] == "shopp-categories" )
-		{
-			$return = true;
-		}
-		
-		
-		// return
-		return $return;
+//	function validate_page()
+//	{
+//		// global
+//		global $pagenow;
+//
+//
+//		// vars
+//		$return = false;
+//
+//
+//		// validate page
+//		if( in_array( $pagenow, array( 'edit-tags.php', 'profile.php', 'user-new.php', 'user-edit.php', 'media.php' ) ) )
+//		{
+//			$return = true;
+//		}
+//
+//
+//		// validate page (Shopp)
+//		if( $pagenow == "admin.php" && isset( $_GET['page'], $_GET['id'] ) && $_GET['page'] == "shopp-categories" )
+//		{
+//			$return = true;
+//		}
+//
+//
+//		// return
+//		return $return;
 	}
 	
 	
@@ -107,7 +107,7 @@ class acf_everything_fields
 
 		
 		// validate page
-		if( ! $this->validate_page() ) return;
+//		if( ! $this->validate_page() ) return;
 		
 		
 		// set page type
@@ -228,9 +228,6 @@ class acf_everything_fields
 		// Add admin head
 		add_action('admin_head', array($this,'admin_head'));
 
-
-
-		
 		
 	}
 

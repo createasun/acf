@@ -26,7 +26,6 @@ class acf_input
 	
 	function __construct($acf)
 	{
-	
 		// vars
 		$this->acf = $acf;  //wdh changed from $parent - better naming
 		
@@ -75,36 +74,38 @@ class acf_input
 	
 	function validate_page()
 	{
+        phplog('input.php','*********************************************** validate_page' );
+
 		// global
 		global $pagenow, $typenow;
-		
-		
+
+
 		// vars
 		$return = false;
-		
-		
+
+
 		// validate page
 		if( in_array( $pagenow, array('post.php', 'post-new.php') ) )
 		{
-		
+
 			// validate post type
 			global $typenow;
-			
+
 			if( $typenow != "acf" )
 			{
 				$return = true;
 			}
-			
+
 		}
-		
-		
+
+
 		// validate page (Shopp)
 		if( $pagenow == "admin.php" && isset( $_GET['page'] ) && $_GET['page'] == "shopp-products" && isset( $_GET['id'] ) )
 		{
 			$return = true;
 		}
-		
-		
+
+
 		// return
 		return $return;
 	}
@@ -120,8 +121,10 @@ class acf_input
 	
 	function admin_print_scripts()
 	{
+        phplog('input.php','*********************************************** admin_print_scripts' );
+
 		// validate page
-		if( ! $this->validate_page() ) return;
+//		if( ! $this->validate_page() ) return;
 		
 		
 		do_action('acf_print_scripts-input');
@@ -144,8 +147,10 @@ class acf_input
 	
 	function admin_print_styles()
 	{
+        phplog('input.php','*********************************************** admin_print_styles' );
+
 		// validate page
-		if( ! $this->validate_page() ) return;
+//		if( ! $this->validate_page() ) return;
 		
 		do_action('acf_print_styles-input');
 	}
@@ -161,8 +166,10 @@ class acf_input
 	
 	function admin_head()
 	{
+        phplog('input.php','*********************************************** admin_head' );
+
 		// validate page
-		if( ! $this->validate_page() ) return;
+//		if( ! $this->validate_page() ) return;
 		
 		
 		// globals
@@ -193,7 +200,7 @@ class acf_input
     *-------------------------------------------------------------------------------------*/
     function render_meta_boxes( $post, $post_type  )
     {
-        phplog('input.php',' $post = ',$post );
+//        phplog('input.php',' $post = ',$post );
 
         $post_id = ($post) ? $post->ID : 0;
 

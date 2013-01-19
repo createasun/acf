@@ -79,11 +79,10 @@ class Acf
 		
 		// set text domain
 		load_plugin_textdomain('acf', false, basename(dirname(__FILE__)).'/lang' );
-		
-		
-		// controllers
-		$this->setup_controllers();
-		
+
+//        // controllers
+//		$this->setup_controllers();
+
 		
 		// actions
 		add_action('init', array($this, 'init'));
@@ -104,6 +103,9 @@ class Acf
 		
 		return true;
 	}
+
+
+
 	
 	
 	/*
@@ -116,6 +118,12 @@ class Acf
 	
 	function init()
 	{
+
+        // wdh : removed from constructor & added here to include files on-demand using get_admin_screen()
+        // (rather than including all files then each validating themselves if required)
+        $this->setup_controllers();
+
+
 		// setup defaults
 		$this->defaults = apply_filters('acf_settings', $this->defaults);
 		
@@ -336,49 +344,69 @@ class Acf
 	
 	
 	/*
-	*  setup_fields
+	*  setup_controllers
 	*
-	*  @description: 
+	*  @description: include files on-demand using get_admin_screen().
+	*  (rather than including all files then each validating themselves if required)
 	*  @since 3.2.6
 	*  @created: 23/06/12
+	*  @created: 19/01/12
+	*
 	*/
-
 	function setup_controllers()
 	{
+        $screen = $this->get_admin_screen();
+
+
 		// Settings
-		include_once('core/controllers/settings.php');
+        include_once('core/controllers/settings.php');
 		$this->settings = new acf_settings($this);
+
 		
-		
+		// wdh : todo : lose upgrade.php ??
 		// upgrade
-		include_once('core/controllers/upgrade.php');
-		$this->upgrade = new acf_upgrade($this);
+//		include_once('core/controllers/upgrade.php');
+//		$this->upgrade = new acf_upgrade($this);
+
 		
-		
-		// field_groups
-		include_once('core/controllers/field_groups.php');
-		$this->field_groups =  new acf_field_groups($this);
-		
-		
-		// field_group
-		include_once('core/controllers/field_group.php');
-		$this->field_group = new acf_field_group($this);
-		
-		
-		// input
-		include_once('core/controllers/input.php');
-		$this->input = new acf_input($this);
-		
-		
+
+        if( $screen[TYPE]=='acf' )  // todo : change from 'acf' to <theme-name>.'-acf' ??
+        {
+             if( $screen[ACTION]==ADD || $screen[ACTION]==EDIT )
+            {
+                // field_group
+                include_once('core/controllers/field_group.php');
+                $this->field_group = new acf_field_group($this);
+            }
+            else
+            {
+                // field_groups
+                include_once('core/controllers/field_groups.php');
+                $this->field_groups =  new acf_field_groups($this);
+            }
+        }
+
+
+
+        if( ( ($screen[BASE]==POST && $screen[TYPE]!='acf') || ($screen[TYPE]==ADMIN && $screen[SUBTYPE]=="shopp-products") ) && ($screen[ACTION]==ADD || $screen[ACTION]==EDIT) )
+        {
+            include_once('core/controllers/input.php');
+            $this->input = new acf_input($this);
+        }
+
+
 		// options page
 		include_once('core/controllers/options_page.php');
 		$this->options_page = new acf_options_page($this);
-		
-		
-		// everthing fields
-		include_once('core/controllers/everything_fields.php');
-		$this->everything_fields = new acf_everything_fields($this);
-		
+
+
+
+        if( ( ($screen[TYPE]==TAXONOMY || $screen[TYPE]==USER) || ($screen[TYPE]==ADMIN && $screen[SUBTYPE]=="shopp_category") ) && ($screen[ACTION]==ADD || $screen[ACTION]==EDIT) )
+        {
+            // everthing fields
+            include_once('core/controllers/everything_fields.php');
+            $this->everything_fields = new acf_everything_fields($this);
+        }
 		
 		// Third Party Compatibility
 		include_once('core/controllers/third_party.php');
@@ -395,7 +423,7 @@ class Acf
 	*/
 	
 	function admin_menu() {
-	
+
 		// add acf page to options menu
 		add_utility_page(__("Custom Fields",'acf'), __("Custom Fields",'acf'), 'manage_options', 'edit.php?post_type=acf');
 		
