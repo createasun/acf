@@ -23,6 +23,7 @@ class Acf
 		$fields,
 		$cache,
 		$defaults,
+
 		
 		
 		// controllers
@@ -46,7 +47,6 @@ class Acf
 
     function __construct( $acf_dir, $theme_prefix='acf-' )
     {
-
         // vars
         $this->path = plugin_dir_path(__FILE__);
         $this->dir = $acf_dir;//plugins_url('',__FILE__); // **** wdh : removed for theme use
@@ -106,18 +106,23 @@ class Acf
 
 
 
-	
-	
-	/*
-	*  Init
-	*
-	*  @description: 
-	*  @since 1.0.0
-	*  @created: 23/06/12
-	*/
+
+
+    /*--------------------------------------------------------------------------------------
+    *  Init
+    *
+    *  @description:
+    *  @since 1.0.0
+    *  @created: 23/06/12
+    *-------------------------------------------------------------------------------------*/
 	
 	function init()
 	{
+        global $pagenow;
+
+//        phplog('acf.php','********************************************* INIT' );
+//        phplog('sola-acf.php','$pagenow = ',$pagenow );
+
 
         // wdh : removed from constructor & added here to include files on-demand using get_admin_screen()
         // (rather than including all files then each validating themselves if required)
@@ -126,15 +131,15 @@ class Acf
 
 		// setup defaults
 		$this->defaults = apply_filters('acf_settings', $this->defaults);
-		
-		
+
+
 		// allow for older filters
 		$this->defaults['options_page']['title'] = apply_filters('acf_options_page_title', $this->defaults['options_page']['title']);
-		
-		
+
+
 		// setup fields
 		$this->setup_fields();
-		
+
 
 		// Create ACF post type
 		$labels = array(
@@ -147,10 +152,10 @@ class Acf
 		    'view_item' => __('View Field Group', 'acf'),
 		    'search_items' => __('Search Field Groups', 'acf'),
 		    'not_found' =>  __('No Field Groups found', 'acf'),
-		    'not_found_in_trash' => __('No Field Groups found in Trash', 'acf'), 
+		    'not_found_in_trash' => __('No Field Groups found in Trash', 'acf'),
 		);
-		
-		
+
+
 		register_post_type('acf', array(
 			'labels' => $labels,
 			'public' => false,
@@ -165,8 +170,8 @@ class Acf
 			),
 			'show_in_menu'	=> false,
 		));
-		
-		
+
+
 		// register acf scripts
 		$scripts = array(
 			'acf-fields' => $this->dir . '/js/fields.js',
@@ -174,13 +179,13 @@ class Acf
 			'acf-input-ajax' => $this->dir . '/js/input-ajax.js',
 			'acf-datepicker' => $this->dir . '/core/fields/date_picker/jquery.ui.datepicker.js',
 		);
-		
+
 		foreach( $scripts as $k => $v )
 		{
 			wp_register_script( $k, $v, array('jquery'), $this->version );
 		}
-		
-		
+
+
 		// register acf styles
 		$styles = array(
 			'acf' => $this->dir . '/css/acf.css',
@@ -189,63 +194,17 @@ class Acf
 			'acf-input' => $this->dir . '/css/input.css',
 			'acf-datepicker' => $this->dir . '/core/fields/date_picker/style.date_picker.css',
 		);
-		
+
 		foreach( $styles as $k => $v )
 		{
-			wp_register_style( $k, $v, false, $this->version ); 
+			wp_register_style( $k, $v, false, $this->version );
 		}
 		
 		
 	}
 	
 	
-	/*
-	*  get_cache
-	*
-	*  @description: Simple ACF (once per page) cache
-	*  @since 3.1.9
-	*  @created: 23/06/12
-	*/
-	
-	function get_cache($key = false)
-	{
-		// key is required
-		if( !$key )
-			return false;
-		
-		
-		// does cache at key exist?
-		if( !isset($this->cache[$key]) )
-			return false;
-		
-		
-		// return cahced item
-		return $this->cache[$key];
-	}
-	
-	
-	/*
-	*  set_cache
-	*
-	*  @description: Simple ACF (once per page) cache
-	*  @since 3.1.9
-	*  @created: 23/06/12
-	*/
-	
-	function set_cache($key = false, $value = null)
-	{
-		// key is required
-		if( !$key )
-			return false;
-		
-		
-		// update the cache array
-		$this->cache[$key] = $value;
-		
-		
-		// return true. Probably not needed
-		return true;
-	}
+
 	
 	
 	/*
@@ -355,6 +314,9 @@ class Acf
 	*/
 	function setup_controllers()
 	{
+        global $current_admin_screen;
+
+
         $screen = $this->get_admin_screen();
 
 
@@ -368,23 +330,22 @@ class Acf
 //		include_once('core/controllers/upgrade.php');
 //		$this->upgrade = new acf_upgrade($this);
 
-		
 
-        if( $screen[TYPE]=='acf' )  // todo : change from 'acf' to <theme-name>.'-acf' ??
-        {
-             if( $screen[ACTION]==ADD || $screen[ACTION]==EDIT )
-            {
+        // todo : change from 'acf' to <theme-name>.'-acf' ??
+
+//        if( $screen[TYPE]=='acf' )
+//        {
+            // field_groups
+            include_once('core/controllers/field_groups.php');
+            $this->field_groups =  new acf_field_groups($this);
+
+//            if( $screen[ACTION]==ADD || $screen[ACTION]==EDIT )
+//            {
                 // field_group
                 include_once('core/controllers/field_group.php');
                 $this->field_group = new acf_field_group($this);
-            }
-            else
-            {
-                // field_groups
-                include_once('core/controllers/field_groups.php');
-                $this->field_groups =  new acf_field_groups($this);
-            }
-        }
+//            }
+//        }
 
 
 
@@ -401,7 +362,7 @@ class Acf
 
 
 
-        if( ( ($screen[TYPE]==TAXONOMY || $screen[TYPE]==USER) || ($screen[TYPE]==ADMIN && $screen[SUBTYPE]=="shopp_category") ) && ($screen[ACTION]==ADD || $screen[ACTION]==EDIT) )
+        if( ( ($screen[TYPE]==TAXONOMY || $screen[TYPE]==USER || $screen[TYPE]==MEDIA) || ($screen[TYPE]==ADMIN && $screen[SUBTYPE]=="shopp_category") ) && ($screen[ACTION]==ADD || $screen[ACTION]==EDIT) )
         {
             // everthing fields
             include_once('core/controllers/everything_fields.php');
@@ -2237,6 +2198,54 @@ class Acf
 		// return
 		return $next_id;
 	}
+
+    /*
+	*  get_cache
+	*
+	*  @description: Simple ACF (once per page) cache
+	*  @since 3.1.9
+	*  @created: 23/06/12
+	*/
+
+    function get_cache($key = false)
+    {
+        // key is required
+        if( !$key )
+            return false;
+
+
+        // does cache at key exist?
+        if( !isset($this->cache[$key]) )
+            return false;
+
+
+        // return cahced item
+        return $this->cache[$key];
+    }
+
+
+    /*
+    *  set_cache
+    *
+    *  @description: Simple ACF (once per page) cache
+    *  @since 3.1.9
+    *  @created: 23/06/12
+    */
+
+    function set_cache($key = false, $value = null)
+    {
+        // key is required
+        if( !$key )
+            return false;
+
+
+        // update the cache array
+        $this->cache[$key] = $value;
+
+
+        // return true. Probably not needed
+        return true;
+    }
 	
 }
 ?>

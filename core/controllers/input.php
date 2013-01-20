@@ -72,43 +72,43 @@ class acf_input
 	*  @created: 23/06/12
 	*/
 	
-	function validate_page()
-	{
-        phplog('input.php','*********************************************** validate_page' );
-
-		// global
-		global $pagenow, $typenow;
-
-
-		// vars
-		$return = false;
-
-
-		// validate page
-		if( in_array( $pagenow, array('post.php', 'post-new.php') ) )
-		{
-
-			// validate post type
-			global $typenow;
-
-			if( $typenow != "acf" )
-			{
-				$return = true;
-			}
-
-		}
-
-
-		// validate page (Shopp)
-		if( $pagenow == "admin.php" && isset( $_GET['page'] ) && $_GET['page'] == "shopp-products" && isset( $_GET['id'] ) )
-		{
-			$return = true;
-		}
-
-
-		// return
-		return $return;
-	}
+//	function validate_page()
+//	{
+//        phplog('input.php','*********************************************** validate_page' );
+//
+//		// global
+//		global $pagenow, $typenow;
+//
+//
+//		// vars
+//		$return = false;
+//
+//
+//		// validate page
+//		if( in_array( $pagenow, array('post.php', 'post-new.php') ) )
+//		{
+//
+//			// validate post type
+//			global $typenow;
+//
+//			if( $typenow != "acf" )
+//			{
+//				$return = true;
+//			}
+//
+//		}
+//
+//
+//		// validate page (Shopp)
+//		if( $pagenow == "admin.php" && isset( $_GET['page'] ) && $_GET['page'] == "shopp-products" && isset( $_GET['id'] ) )
+//		{
+//			$return = true;
+//		}
+//
+//
+//		// return
+//		return $return;
+//	}
 	
 	
 	/*

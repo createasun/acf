@@ -249,6 +249,9 @@ class acf_field_group
 	
 	function ajax_acf_field_options()
 	{
+
+        phplog('acf.php','********************  $_POST');
+
 		// vars
 		$options = array(
 			'field_key' => '',
@@ -302,13 +305,15 @@ class acf_field_group
 	
 	function ajax_acf_location($options = array())
 	{
+        phplog('acf.php','********************  $_POST');
+
 		// defaults
 		$defaults = array(
 			'key' => null,
 			'value' => null,
 			'param' => null,
 		);
-		
+
 		// Is AJAX call?
 		if(isset($_POST['action']) && $_POST['action'] == "acf_location")
 		{
@@ -318,34 +323,34 @@ class acf_field_group
 		{
 			$options = array_merge($defaults, $options);
 		}
-		
-		
+
+
 		// some case's have the same outcome
 		if($options['param'] == "page_parent")
 		{
 			$options['param'] = "page";
 		}
 
-		
+
 		$choices = array();
 		$optgroup = false;
-		
+
 		switch($options['param'])
 		{
 			case "post_type":
-				
+
 				// all post types except attachment
 				$choices = $this->acf->get_post_types( array('attachment') );
 
 				break;
-			
-			
+
+
 			case "page":
-				
+
 				$optgroup = true;
 				$post_types = get_post_types( array('capability_type'  => 'page') );
 				unset( $post_types['attachment'], $post_types['revision'] , $post_types['nav_menu_item'], $post_types['acf']  );
-				
+
 				if( $post_types )
 				{
 					foreach( $post_types as $post_type )
@@ -358,11 +363,11 @@ class acf_field_group
 							'post_status' => array('publish', 'private', 'draft', 'inherit', 'future'),
 							'suppress_filters' => false,
 						));
-						
+
 						if( $pages )
 						{
 							$choices[$post_type] = array();
-							
+
 							foreach($pages as $page)
 							{
 								$title = '';
@@ -374,18 +379,18 @@ class acf_field_group
 										$title .= '- ';
 									}
 								}
-								
+
 								$title .= apply_filters( 'the_title', $page->post_title, $page->ID );
-								
-								
+
+
 								// status
 								if($page->post_status != "publish")
 								{
 									$title .= " ($page->post_status)";
 								}
-								
+
 								$choices[$post_type][$page->ID] = $title;
-								
+
 							}
 							// foreach($pages as $page)
 						}
@@ -394,67 +399,67 @@ class acf_field_group
 					// foreach( $post_types as $post_type )
 				}
 				// if( $post_types )
-				
+
 				break;
-			
-			
+
+
 			case "page_type" :
-				
+
 				$choices = array(
 					'front_page'	=>	__("Front Page",'acf'),
 					'posts_page'	=>	__("Posts Page",'acf'),
 					'parent'		=>	__("Parent Page",'acf'),
 					'child'			=>	__("Child Page",'acf'),
 				);
-								
+
 				break;
-				
+
 			case "page_template" :
-				
+
 				$choices = array(
 					'default'	=>	__("Default Template",'acf'),
 				);
-				
+
 				$templates = get_page_templates();
 				foreach($templates as $k => $v)
 				{
 					$choices[$v] = $k;
 				}
-				
+
 				break;
-			
+
 			case "post" :
-				
+
 				$optgroup = true;
 				$post_types = get_post_types( array('capability_type'  => 'post') );
 				unset( $post_types['attachment'], $post_types['revision'] , $post_types['nav_menu_item'], $post_types['acf']  );
-				
+
 				if( $post_types )
 				{
 					foreach( $post_types as $post_type )
 					{
-						
+
 						$posts = get_posts(array(
 							'numberposts' => '-1',
 							'post_type' => $post_type,
 							'post_status' => array('publish', 'private', 'draft', 'inherit', 'future'),
 							'suppress_filters' => false,
 						));
-						
+
 						if( $posts)
 						{
 							$choices[$post_type] = array();
-							
+
 							foreach($posts as $post)
 							{
 								$title = apply_filters( 'the_title', $post->post_title, $post->ID );
-								
+
 								// status
 								if($post->post_status != "publish")
 								{
 									$title .= " ($post->post_status)";
 								}
-								
+
 								$choices[$post_type][$post->ID] = $title;
 
 							}
@@ -465,44 +470,44 @@ class acf_field_group
 					// foreach( $post_types as $post_type )
 				}
 				// if( $post_types )
-				
-				
+
+
 				break;
-			
+
 			case "post_category" :
-				
+
 				$category_ids = get_all_category_ids();
-		
-				foreach($category_ids as $cat_id) 
+
+				foreach($category_ids as $cat_id)
 				{
 				  $cat_name = get_cat_name($cat_id);
 				  $choices[$cat_id] = $cat_name;
 				}
-				
+
 				break;
-			
+
 			case "post_format" :
-				
+
 				$choices = get_post_format_strings();
-								
+
 				break;
-			
+
 			case "user_type" :
-				
+
 				global $wp_roles;
-				
+
 				$choices = $wp_roles->get_names();
-								
+
 				break;
-			
+
 			case "options_page" :
-				
+
 				$defaults = $this->acf->defaults['options_page'];
-				
+
 				$choices = array(
 					'acf-options' => $defaults['title']
 				);
-				
+
 				$titles = $defaults['pages'];
 				if( !empty($titles) )
 				{
@@ -513,50 +518,50 @@ class acf_field_group
 						$choices[ $slug ] = $title;
 					}
 				}
-	
+
 				break;
-			
+
 			case "taxonomy" :
-				
+
 				$choices = $this->acf->get_taxonomies_for_select( array('simple_value' => true) );
 				$optgroup = true;
-								
+
 				break;
-			
+
 			case "ef_taxonomy" :
-				
+
 				$choices = array('all' => __('All', 'acf'));
 				$taxonomies = get_taxonomies( array('public' => true), 'objects' );
-				
+
 				foreach($taxonomies as $taxonomy)
 				{
 					$choices[ $taxonomy->name ] = $taxonomy->labels->name;
 				}
-				
+
 				// unset post_format (why is this a public taxonomy?)
 				if( isset($choices['post_format']) )
 				{
 					unset( $choices['post_format']) ;
 				}
-			
-								
+
+
 				break;
-			
+
 			case "ef_user" :
-				
+
 				global $wp_roles;
-				
+
 				$choices = array_merge( array('all' => __('All', 'acf')), $wp_roles->get_names() );
-			
+
 				break;
-				
-				
+
+
 			case "ef_media" :
-				
+
 				$choices = array('all' => __('All', 'acf'));
-			
+
 				break;
-				
+
 		}
 		
 		$this->acf->create_field(array(
