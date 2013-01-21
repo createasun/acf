@@ -75,14 +75,14 @@ $options = $this->acf->get_acf_options($post->ID);
 			?>
 		</td>
 	</tr>
-	<tr>
+	<!--<tr>
 		<td class="label">
-			<label for="post_type"><?php _e("Hide on screen",'acf'); ?></label>
-			<p class="description"><?php _e("<b>Select</b> items to <b>hide</b> them from the edit screen",'acf'); ?></p>
-			<p class="description"><?php _e("If multiple field groups appear on an edit screen, the first field group's options will be used. (the one with the lowest order number)",'acf'); ?></p>
+			<label for="post_type"><?php /*_e("Hide on screen",'acf'); */?></label>
+			<p class="description"><?php /*_e("<b>Select</b> items to <b>hide</b> them from the edit screen",'acf'); */?></p>
+			<p class="description"><?php /*_e("If multiple field groups appear on an edit screen, the first field group's options will be used. (the one with the lowest order number)",'acf'); */?></p>
 		</td>
 		<td>
-			<?php 
+			<?php /*
 			
 			$this->acf->create_field(array(
 				'type'	=>	'checkbox',
@@ -105,7 +105,7 @@ $options = $this->acf->get_acf_options($post->ID);
 				)
 			));
 			
-			?>
+			*/?>
 		</td>
-	</tr>
+	</tr>-->
 </table>

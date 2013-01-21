@@ -85,20 +85,20 @@ class Acf
 
 		
 		// actions
-		add_action('init', array($this, 'init'));
-		add_action('admin_menu', array($this,'admin_menu'));
-		add_action('admin_head', array($this,'admin_head'));
-		add_action('acf_save_post', array($this, 'acf_save_post'), 10); // save post, called from many places (api, input, everything, options)
+		add_action( 'init',                             array($this,'init')                     );
+		add_action('admin_menu',                        array($this,'admin_menu')               );
+		add_action( 'admin_head',                       array($this,'admin_head')               );
+		add_action( 'acf_save_post',                    array($this,'acf_save_post'), 10        ); // save post, called from many places (api, input, everything, options)
 		
 		
 		// filters
-		add_filter('acf_load_field', array($this, 'acf_load_field'), 5);
-		add_filter('post_updated_messages', array($this, 'post_updated_messages'));
-		add_filter('acf_parse_value', array($this, 'acf_parse_value'));
+		add_filter( 'acf_load_field',                   array($this, 'acf_load_field'), 5       );
+		add_filter( 'post_updated_messages',            array($this, 'post_updated_messages')   );
+		add_filter( 'acf_parse_value',                  array($this, 'acf_parse_value')         );
 		
 		
 		// ajax
-		add_action('wp_ajax_get_input_metabox_ids', array($this, 'get_input_metabox_ids'));
+		add_action( 'wp_ajax_get_input_metabox_ids',    array($this, 'get_input_metabox_ids')   );
 		
 		
 		return true;

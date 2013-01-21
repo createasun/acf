@@ -303,6 +303,11 @@ class acf_everything_fields
             if(!$field_group['fields']) { continue; }
 
 
+
+            // start : input ->render_field_group_input_form() >>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
             $title = "";
             if ( is_numeric( $field_group['id'] ) )
             {
@@ -345,6 +350,9 @@ class acf_everything_fields
 
 
 
+            // start : acf->render_fields_for_input() >>>>>>>>>>>>>>>>>>>>>>>>>
+
+
             $field_group_values = $this->acf->get_field_group_values( $primary_key_id, $field_group_values_key, $field_group['id'], $options['page_type'] );
 
             // filter, set defaults and clean
@@ -358,19 +366,14 @@ class acf_everything_fields
             // render
             foreach($field_group['fields'] as $field)
             {
-                // if they didn't select a type, skip this field
-                if($field['type'] == 'null') continue;
-
-                if(!isset($field['required'])) { $field['required'] = 0; }
+                // no type - skip this field
+                if(!$field['type'] || $field['type'] == 'null') { continue; }
 
                 $required_class = ($field['required']) ? ' required' : '';
                 $required_label = ($field['required']) ? ' <span class="required">*</span>' : '';
 
-                // wdh : we dont read each value from postmeta individually - we find value in values_array
-                // wdh : use name as key : removed $field['key'];
+                // wdh : set fields and make more readable in rendering code
                 // wdh : create $field['slug'] because $field['name'] gets rewritten later
-                // wdh : set fields and rename to more readable in rendering code
-
                 $field['slug']      = $field['name'];
                 $field_slug         = $field['slug'];
 
@@ -386,13 +389,12 @@ class acf_everything_fields
                 $field_label        = $field['label'];
                 $field_instructions = $field['instructions'];
 
-                // wdh : ** important change for $_POST to group the separate fields into field groups **
-                // the $field['name'] is rewritten for the field 'name' attr as a multidimensional array for $_POST
+                // name is key
+                // group separate fields into field groups
+                // the $field['name'] is rewritten for $_POST field 'name' multidimensional array
                 $field['name']      = 'fields['.$field_group_values_key.']['.$field_slug.']';
 
-                // wdh : removed
-//                if( ! isset($field['value']) ) { $field['value'] = $this->get_value($post_id, $field); }
-                // wdh : added
+                // get value from values_array
                 $field['value'] = $this->acf->get_field_value( $field_group_values_key, array( $field_slug ), $primary_key_id, false, $field_group_post_id );
 
 
@@ -412,7 +414,7 @@ class acf_everything_fields
                     echo '<div id='.$field_wrapper_id.'" class="form-field field-'.$field_type.' field-'.$field_slug. $required_class.'">';
                     echo '<label for='.$field_id.'>'.$field_label.$required_label.'</label>';
                     $this->acf->create_field($field);
-                    if($field_instructions) echo '<p class="description">'.$field_instructions.'</p>';
+                    if($field_instructions) { echo '<p class="description">'.$field_instructions.'</p>'; }
                     echo '</div>';
                 }
                 else // table row for users /
@@ -421,7 +423,7 @@ class acf_everything_fields
                     echo '<th valign="top" scope="row"><label for='.$field_id.'>'.$field_label.$required_label.'</label></th>';
                     echo '<td>';
                     $this->acf->create_field($field);
-                    if($field_instructions) echo '<p class="description">'.$field_instructions.'</p>';
+                    if($field_instructions) { echo '<p class="description">'.$field_instructions.'</p>'; }
                     echo '</td>';
                     echo '</tr>';
                 }
@@ -440,6 +442,9 @@ class acf_everything_fields
             {
                 echo '</div></div>';
             }
+
+
+            //<<<<<<<<<<<<<<<<<<< end : acf->render_fields_for_input()
 
         }
 

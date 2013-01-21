@@ -14,15 +14,15 @@ class acf_input
 
 	var $acf,
 		$data;
-
-
-    /*=========================================================================================
-    *  __construct
-    *
-    *  @description:
-    *  @since 3.1.8
-    *  @created: 23/06/12
-    *=========================================================================================*/
+		
+	
+	/*
+	*  __construct
+	*
+	*  @description: 
+	*  @since 3.1.8
+	*  @created: 23/06/12
+	*/
 	
 	function __construct($acf)
 	{
@@ -31,9 +31,9 @@ class acf_input
 		
 		
 		// actions
-		add_action( 'admin_print_scripts',      array($this,'admin_print_scripts')              );
-		add_action( 'admin_print_styles',       array($this,'admin_print_styles')               );
-		add_action( 'admin_head',               array($this,'admin_head')                       );
+		add_action('admin_print_scripts', array($this,'admin_print_scripts'));
+		add_action('admin_print_styles', array($this,'admin_print_styles'));
+		add_action('admin_head', array($this,'admin_head'));
 		
 		
 		// save
@@ -43,78 +43,140 @@ class acf_input
 		{
 			if( $_POST['post_type'] == "tribe_events" ){ $save_priority = 15; }
 		}
-		add_action( 'save_post', array($this, 'save_post'), $save_priority); // save later to avoid issues with 3rd party plugins
+		add_action('save_post', array($this, 'save_post'), $save_priority); // save later to avoid issues with 3rd party plugins
 		
 		
 		// custom actions (added in 3.1.8)
-		add_action( 'acf_head-input',           array($this, 'acf_head_input')                  );
+		add_action('acf_head-input', array($this, 'acf_head_input'));
 
-		add_action( 'acf_print_scripts-input',  array($this, 'acf_print_scripts_input')         );
-		add_action( 'acf_print_styles-input',   array($this, 'acf_print_styles_input')          );
-		add_action( 'wp_restore_post_revision', array($this, 'wp_restore_post_revision'), 10, 2 );
-		add_filter( '_wp_post_revision_fields', array($this, 'wp_post_revision_fields')         );
+		add_action('acf_print_scripts-input', array($this, 'acf_print_scripts_input'));
+		add_action('acf_print_styles-input', array($this, 'acf_print_styles_input'));
+		add_action('wp_restore_post_revision', array($this, 'wp_restore_post_revision'), 10, 2 );
+		add_filter('_wp_post_revision_fields', array($this, 'wp_post_revision_fields') );
 		
 		// ajax
-		add_action( 'wp_ajax_acf_input',        array($this, 'ajax_acf_input')                  );
-		add_action( 'wp_ajax_get_input_style',  array($this, 'ajax_get_input_style')            );
+		add_action('wp_ajax_acf_input', array($this, 'ajax_acf_input'));
+		add_action('wp_ajax_get_input_style', array($this, 'ajax_get_input_style'));
 		
 		
 		// edit attachment hooks (used by image / file / gallery)
-		add_action( 'admin_head-media.php',     array($this, 'admin_head_media')                );
-		add_action( 'admin_head-upload.php',    array($this, 'admin_head_upload')               );
+		add_action('admin_head-media.php', array($this, 'admin_head_media'));
+		add_action('admin_head-upload.php', array($this, 'admin_head_upload'));
 	}
-
-    /*--------------------------------------------------------------------------------------
-    *  admin_print_scripts
-    *
-    *  @description:
-    *  @since 3.1.8
-    *  @created: 23/06/12
-    *-------------------------------------------------------------------------------------*/
+	
+	
+	/*
+	*  validate_page
+	*
+	*  @description: returns true | false. Used to stop a function from continuing
+	*  @since 3.2.6
+	*  @created: 23/06/12
+	*/
+	
+//	function validate_page()
+//	{
+//        phplog('input.php','*********************************************** validate_page' );
+//
+//		// global
+//		global $pagenow, $typenow;
+//
+//
+//		// vars
+//		$return = false;
+//
+//
+//		// validate page
+//		if( in_array( $pagenow, array('post.php', 'post-new.php') ) )
+//		{
+//
+//			// validate post type
+//			global $typenow;
+//
+//			if( $typenow != "acf" )
+//			{
+//				$return = true;
+//			}
+//
+//		}
+//
+//
+//		// validate page (Shopp)
+//		if( $pagenow == "admin.php" && isset( $_GET['page'] ) && $_GET['page'] == "shopp-products" && isset( $_GET['id'] ) )
+//		{
+//			$return = true;
+//		}
+//
+//
+//		// return
+//		return $return;
+//	}
+	
+	
+	/*
+	*  admin_print_scripts
+	*
+	*  @description: 
+	*  @since 3.1.8
+	*  @created: 23/06/12
+	*/
 	
 	function admin_print_scripts()
 	{
         phplog('input.php','*********************************************** admin_print_scripts' );
 
+		// validate page
+//		if( ! $this->validate_page() ) return;
+		
+		
 		do_action('acf_print_scripts-input');
-
+		
+		
 		// only "edit post" input pages need the ajax
 		wp_enqueue_script(array(
 			'acf-input-ajax',	
 		));
 	}
-
-
-    /*--------------------------------------------------------------------------------------
-    *  admin_print_styles
-    *
-    *  @description:
-    *  @since 3.1.8
-    *  @created: 23/06/12
-    *-------------------------------------------------------------------------------------*/
+	
+	
+	/*
+	*  admin_print_styles
+	*
+	*  @description: 
+	*  @since 3.1.8
+	*  @created: 23/06/12
+	*/
 	
 	function admin_print_styles()
 	{
         phplog('input.php','*********************************************** admin_print_styles' );
 
+		// validate page
+//		if( ! $this->validate_page() ) return;
+		
 		do_action('acf_print_styles-input');
 	}
-
-
-    /*--------------------------------------------------------------------------------------
-    *  admin_head
-    *
-    *  @description:
-    *  @since 3.1.8
-    *  @created: 23/06/12
-    *-------------------------------------------------------------------------------------*/
+	
+	
+	/*
+	*  admin_head
+	*
+	*  @description: 
+	*  @since 3.1.8
+	*  @created: 23/06/12
+	*/
 	
 	function admin_head()
 	{
         phplog('input.php','*********************************************** admin_head' );
 
+		// validate page
+//		if( ! $this->validate_page() ) return;
+		
+		
+		// globals
 		global $post, $pagenow, $typenow;
-
+		
+		
 		// shopp
 		if( $pagenow == "admin.php" && isset( $_GET['page'] ) && $_GET['page'] == "shopp-products" && isset( $_GET['id'] ) )
 		{
@@ -126,39 +188,37 @@ class acf_input
         }
 
 
-        $this->render_field_groups_for_input( $post, $post_type  );
+        $this->render_meta_boxes( $post, $post_type  );
 
 
 	}
     /*--------------------------------------------------------------------------------------
-    *  render_field_groups_for_input
+    *  render_meta_boxes
     *
     *  @description:
     *  @since
     *  @author: Wayne D Harris adapted from Elliot Condon
     *-------------------------------------------------------------------------------------*/
-    function render_field_groups_for_input( $post, $post_type  )
+    function render_meta_boxes( $post, $post_type  )
     {
 //        phplog('input.php',' $post = ',$post );
 
         $post_id = ($post) ? $post->ID : 0;
 
         // get style for page
-        $show_field_group_ids = $this->acf->get_show_field_group_ids( array( 'post_id' => $post_id, 'post_type' => $post_type ), false);
+        $show_field_group_ids = $this->acf->get_input_metabox_ids( array( 'post_id' => $post_id, 'post_type' => $post_type ), false);
 
-        // wdh : removed 'show on screen' styling : logic is inconsistent with page type
-//        $style = isset($show_field_group_ids[0]) ? $this->show_on_screen($show_field_group_ids[0]) : '';
-//        echo '<style type="text/css" id="acf_style" >' .$style . '</style>';
+        $style = isset($show_field_group_ids[0]) ? $this->get_input_style($show_field_group_ids[0]) : '';
+
+        echo '<style type="text/css" id="acf_style" >' .$style . '</style>';
+
 
         // Style
         echo '<style type="text/css">.acf_postbox, .postbox[id*="acf_"] { display: none; }</style>';
 
 
-        // Create nonce for page/posts
-//        if ($this->acf->session[SCREEN][BASE]==POST || )
-//        {
-            echo '<script type="text/javascript">acf.post_id = ' . $post_id . '; acf.nonce = "' . wp_create_nonce( 'acf_nonce' ) . '";</script>';
-//        }
+        // Javascript
+        echo '<script type="text/javascript">acf.post_id = ' . $post_id . '; acf.nonce = "' . wp_create_nonce( 'acf_nonce' ) . '";</script>';
 
 
         // add user js + css
@@ -172,27 +232,35 @@ class acf_input
         {
             $field_group = $this->acf->get_acf_field_group($field_group_id);
 
-
-
             // $field_group_values_key for native acf is set as $field_group['name'].
-            // * but note there is scope to dynamically add_field_group_meta_boxes with unique $field_group_values_key
-            $this->add_field_group_meta_box( $field_group, $field_group['name'], $post_type );
-
-
-
-
-
+            // But note there is scope to dynamically add_acf_meta_boxes with unique $field_group_values_key
+            $this->add_acf_meta_box( $field_group, $field_group['name'], $post_type );
         }
+
+//        // get acf's
+//        $field_groups = $this->acf->get_field_groups(); //wdh : changed '$acfs' to '$field_group' - better naming
+//
+//        if($field_groups)
+//        {
+//            foreach($field_groups as $field_group)
+//            {
+//                // hide / show
+//                $show = in_array($field_group['id'], $show_field_group_ids) ? 1 : 0;
+//
+//                $this->add_acf_meta_box( $field_group, $field_group['name'], $post_type, $show );
+//
+//            }
+//        }
 
     }
     /*--------------------------------------------------------------------------------------
-    *  add_field_group_meta_box
+    *  add_acf_meta_box
     *
     *  @description:
     *  @since
-    *  @author: Wayne D Harris adapted from Elliot Condon
+    *  @author: Wayne D Harris from Elliot Condon
     *-------------------------------------------------------------------------------------*/
-    function add_field_group_meta_box( $field_group, $field_group_values_key=null, $screen=null, $show=true )
+    function add_acf_meta_box( $field_group, $field_group_values_key=null, $screen=null, $show=true )
     {
         global $post, $typenow;
 
@@ -214,7 +282,7 @@ class acf_input
             // wdh : ** note: metabox id must start with 'acf_' for input-actions.js
             'acf_'.$field_group['name'],       //metabox id : wdh : replaced 'acf_'.$field_group['id'],
             __( $field_group['title'], 'acf' ), //metabox title : wdh : added localisation
-            array($this, 'render_field_group_input_form'),
+            array($this, 'meta_box_input'),
             $screen,
             $field_group['options']['position'],
             $priority,
@@ -230,14 +298,15 @@ class acf_input
 	    );
     }
     /*--------------------------------------------------------------------------------------
-    *  render_field_group_input_form
+    *  meta_box_input
     *
-    *  @description:
+    *
+    *  @description: add_acf_meta_box callback
     *  @since 1.0.0
     *  @created: 23/06/12
     *-------------------------------------------------------------------------------------*/
 
-    function render_field_group_input_form($post, $metabox)
+    function meta_box_input($post, $metabox)
     {
         // vars
         $options = array(
@@ -269,94 +338,37 @@ class acf_input
 
             // ***********************************
 
+            echo '<div class="options" data-layout="' . $options['options']['layout'] . '" data-show="' . $options['show'] . '" style="display:none"></div>';
 
-
-            $this->acf->render_fields_for_input( $options['fields'], $options['post_id'], $field_group_values_key, $options['field_group_post_id'] );
-
-        }
-    }
-
-    /*--------------------------------------------------------------------------------------
-     *  render_fields_for_input
-     *
-     *  @description:
-     *  @since 3.1.6
-     *  @author Elliot Condon / Wayne D Harris
-     *-------------------------------------------------------------------------------------*/
-    function render_fields_for_input( $fields, $post_id, $field_group_values_key, $field_group_post_id )
-    {
-
-        //filter field values
-        $field_group_values = $this->get_field_group_values( $post_id, $field_group_values_key, $field_group_post_id );
-
-        // filter, set defaults and clean
-        $field_config_value_pair = $this->map_field_config_to_value( $fields, $field_group_values['field_values'], ACF_LOAD_VALUE_, ACF_LOAD_FIELD_ );
-
-        //set caches of load value filtered results - we'll read from these now until an update
-        $field_group_values['field_values'] = $field_config_value_pair['value'];
-        $this->set_cache( 'acf_field_group_values_'.$field_group_values_key, $field_group_values );
-
-        // * at this point we have set data as required only on read to be used for processing/display now but not in db until save post/update
-
-        // create fields
-        if($fields)
-        {
-            foreach($fields as $field)
+            if( $options['show'] )
             {
-                // no type - skip this field
-                if(!$field['type'] || $field['type'] == 'null') { continue; }
+                // ***********************************
+                // wdh :  pass additional params
 
-                $required_class = ($field['required']) ? ' required' : '';
-                $required_label = ($field['required']) ? ' <span class="required">*</span>' : '';
+                // wdh: removed
+//              $this->acf->render_fields_for_input( $options['fields'], $options['post_id'] );
 
-                // wdh : set fields and make more readable in rendering code
-                // wdh : create $field['slug'] because $field['name'] gets rewritten later
-                $field['slug']      = $field['name'];
-                $field_slug         = $field['slug'];
+                // wdh: added
+                $this->acf->render_fields_for_input( $options['fields'], $options['post_id'], $field_group_values_key, $options['field_group_post_id'] );
 
-                $uid                = $field_group_values_key.'-'.$field_slug;
-
-                $field_wrapper_id   = 'acf-'.$uid;
-
-                $field['id']        = 'acf-field-'.$uid;
-                $field_id           = $field['id'];
-
-                $field_type         = $field['type'];
-                $field_key          = $field['key'];
-                $field_label        = $field['label'];
-                $field_instructions = $field['instructions'];
-
-                // name is key
-                // group separate fields into field groups
-                // the $field['name'] is rewritten for $_POST field 'name' multidimensional array
-                $field['name']      = 'fields['.$field_group_values_key.']['.$field_slug.']';
-
-                // get value from values_array
-                $field['value'] = $this->get_field_value( $field_group_values_key, array( $field_slug ), $post_id, false, $field_group_post_id );
-
-
-
-                echo '<div class="options" data-layout="' . $options['options']['layout'] . '" data-show="' . $options['show'] . '" style="display:none"></div>';
-                echo '<div id='.$field_wrapper_id.'" class="field field-'.$field_type.' field-'.$field_slug. $required_class. '"data-field_name="'.$field_slug.'" data-field_key="'.$field_key.'">';
-                echo '<p class="label">';
-                echo '<label for='.$field_id.'>'.$field_label.$required_label.'</label>';
-                echo $field_instructions;
-                echo '</p>';
-                $this->create_field($field);
-                echo '</div>';
-
+                // ***********************************
             }
+            else
+            {
+                echo '<div class="acf-replace-with-fields"><div class="acf-loading"></div></div>';
+            }
+
         }
     }
     /*--------------------------------------------------------------------------------------
-    *  show_on_screen
+    *  get_input_style
     *
     *  @description: called by admin_head to generate acf css style (hide other metaboxes)
     *  @since 2.0.5
     *  @rewrite: 05/01/13 by wdh
     *  @author: Wayne D Harris / Elliot Condon
     *-------------------------------------------------------------------------------------*/
-    function show_on_screen( $field_group_id = false )
+    function get_input_style( $field_group_id = false )
 	{
         // vars
         $field_groups = $this->acf->get_field_groups();
@@ -371,32 +383,32 @@ class acf_input
 
                 $options_hide_array = $field_group['options']['hide_on_screen'];
 
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'the_content',      'postdivrich'       );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'excerpt',          'postexcerpt'       );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'custom_fields',    'postcustom'        );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'discussion',       'commentstatusdiv'  );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'comments',         'commentsdiv'       );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'slug',             'slugdiv'           );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'author',           'authordiv'         );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'format',           'formatdiv'         );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'featured_image',   'postimagediv'      );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'revisions',        'revisionsdiv'      );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'categories',       'categorydiv'       );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'tags',             'tagsdiv-post_tag'  );
-                $html .= $this->maybe_hide_screen_style( $options_hide_array,  'send-trackbacks',  'trackbacksdiv'     );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'the_content',      'postdivrich'       );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'excerpt',          'postexcerpt'       );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'custom_fields',    'postcustom'        );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'discussion',       'commentstatusdiv'  );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'comments',         'commentsdiv'       );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'slug',             'slugdiv'           );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'author',           'authordiv'         );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'format',           'formatdiv'         );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'featured_image',   'postimagediv'      );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'revisions',        'revisionsdiv'      );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'categories',       'categorydiv'       );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'tags',             'tagsdiv-post_tag'  );
+                $html .= $this->maybe_hide_metabox_style( $options_hide_array,  'send-trackbacks',  'trackbacksdiv'     );
             }
         }
         return $html;
     }
     /*--------------------------------------------------------------------------------------
-    *  maybe_hide_screen_style
+    *  maybe_hide_metabox_style
     *
     *  @description: hide metabox style
     *  @since 2.0.5
     *  @rewrite: 05/01/13 by wdh
     *  @author: Wayne D Harris / Elliot Condon
     *-------------------------------------------------------------------------------------*/
-    function maybe_hide_screen_style( $options_hide_array, $style_key, $style_name )
+    function maybe_hide_metabox_style( $options_hide_array, $style_key, $style_name )
 	{
         if( in_array( $style_key, $options_hide_array ) )
         {
@@ -425,7 +437,7 @@ class acf_input
 		// overrides
 		if(isset($_POST['acf_id']))
 		{
-			echo $this->show_on_screen($_POST['acf_id']);
+			echo $this->get_input_style($_POST['acf_id']);
 		}
 		
 		die;
