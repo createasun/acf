@@ -34,7 +34,8 @@ class Acf
 		$input,
 		$options_page,
 		$everything_fields,
-		$third_party;
+		$third_party,
+        $screen;        //wdh
 	
 	
 	/*
@@ -83,10 +84,10 @@ class Acf
 //        // controllers
 //		$this->setup_controllers();
 
-		
+
 		// actions
 		add_action( 'init',                             array($this,'init')                     );
-		add_action('admin_menu',                        array($this,'admin_menu')               );
+		add_action( 'admin_menu',                       array($this,'admin_menu')               );
 		add_action( 'admin_head',                       array($this,'admin_head')               );
 		add_action( 'acf_save_post',                    array($this,'acf_save_post'), 10        ); // save post, called from many places (api, input, everything, options)
 		
@@ -122,6 +123,9 @@ class Acf
 
 //        phplog('acf.php','********************************************* INIT' );
 //        phplog('sola-acf.php','$pagenow = ',$pagenow );
+
+        include_once('core/controllers/screen.php');
+        $this->screen = new Acf_Screen();
 
 
         // wdh : removed from constructor & added here to include files on-demand using get_admin_screen()
@@ -314,11 +318,6 @@ class Acf
 	*/
 	function setup_controllers()
 	{
-        global $current_admin_screen;
-
-
-        $screen = $this->get_admin_screen();
-
 
 		// Settings
         include_once('core/controllers/settings.php');
@@ -333,7 +332,7 @@ class Acf
 
         // todo : change from 'acf' to <theme-name>.'-acf' ??
 
-//        if( $screen[TYPE]=='acf' )
+//        if( $this->screen->get_screen_type=='acf' )
 //        {
             // field_groups
             include_once('core/controllers/field_groups.php');
@@ -349,11 +348,11 @@ class Acf
 
 
 
-        if( ( ($screen[BASE]==POST && $screen[TYPE]!='acf') || ($screen[TYPE]==ADMIN && $screen[SUBTYPE]=="shopp-products") ) && ($screen[ACTION]==ADD || $screen[ACTION]==EDIT) )
-        {
+//        if( $this->screen->is_base_post_screen() && $this->screen->get_screen_type()!='acf')
+//        {
             include_once('core/controllers/input.php');
             $this->input = new acf_input($this);
-        }
+//        }
 
 
 		// options page
@@ -362,16 +361,19 @@ class Acf
 
 
 
-        if( ( ($screen[TYPE]==TAXONOMY || $screen[TYPE]==USER || $screen[TYPE]==MEDIA) || ($screen[TYPE]==ADMIN && $screen[SUBTYPE]=="shopp_category") ) && ($screen[ACTION]==ADD || $screen[ACTION]==EDIT) )
-        {
-            // everthing fields
-            include_once('core/controllers/everything_fields.php');
-            $this->everything_fields = new acf_everything_fields($this);
-        }
+//        if( ( ($screen[TYPE]==TAXONOMY || $screen[TYPE]==USER || $screen[TYPE]==MEDIA) || ($screen[TYPE]==ADMIN && $screen[SUBTYPE]=="shopp_category") ) && ($screen[ACTION]==ADD || $screen[ACTION]==EDIT) )
+//        {
+//            // everthing fields
+//            include_once('core/controllers/everything_fields.php');
+//            $this->everything_fields = new acf_everything_fields($this);
+//        }
 		
 		// Third Party Compatibility
 		include_once('core/controllers/third_party.php');
 		$this->third_party = new acf_third_party($this);
+
+
+
 	}
 	
 	
@@ -1142,7 +1144,7 @@ class Acf
 	*	get_input_metabox_ids
 	*	- called by function.fields to hide / show metaboxes
 	*   wdh : unfortunate naming..  get_field_group_ids_to_show would be better
-	*	
+	*
 	*	@author Elliot Condon
 	*	@since 2.0.5
 	* 

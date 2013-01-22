@@ -8,12 +8,14 @@
 *  @created: 23/06/12
 */
 
- 
+
+
 class acf_input
 {
 
 	var $acf,
-		$data;
+		$data,
+        $screen;
 
 
     /*=========================================================================================
@@ -28,8 +30,10 @@ class acf_input
 	{
 		// vars
 		$this->acf = $acf;  //wdh changed from $parent - better naming
-		
-		
+
+        $this->screen = $this->acf->screen;
+
+
 		// actions
 		add_action( 'admin_print_scripts',      array($this,'admin_print_scripts')              );
 		add_action( 'admin_print_styles',       array($this,'admin_print_styles')               );
@@ -115,19 +119,94 @@ class acf_input
 
 		global $post, $pagenow, $typenow;
 
+
+        $post_type = $typenow;
 		// shopp
 		if( $pagenow == "admin.php" && isset( $_GET['page'] ) && $_GET['page'] == "shopp-products" && isset( $_GET['id'] ) )
 		{
             $post_type = "shopp_product";
 		}
-        else
+
+
+        // decide here how we call render_field_groups_for_input...
+
+        // page/post/custom-post/ media ??? -> metabox callback
+
+        // user edit -> 'show_user_profile' hook
+        // user add ->  js / ajax (no hook unfortunately)
+
+        // taxonomy edit -> $taxonomy_name.'_edit_form_fields' hook
+        // taxonomy edit -> $taxonomy_name.'_add_form_fields' hook
+
+        // options ???
+
+        // shopp??
+
+
+        switch (true)
         {
-            $post_type = $typenow;
+            //....................................................................
+            case $this->screen->is_options_screen():
+
+                $this->screen->set_acf_layout('div');
+                $this->render_field_groups_for_input();
+                break;
+
+            //....................................................................
+            case $this->screen->is_base_post_screen():
+
+                $this->screen->set_acf_layout('metabox');
+
+//              $style = isset($show_field_group_ids[0]) ? $this->show_on_screen($show_field_group_ids[0]) : '';
+//              echo '<style type="text/css" id="acf_style" >' .$style . '</style>';
+
+                echo '<style type="text/css">.acf_postbox, .postbox[id*="acf_"] { display: none; }</style>';
+
+                // Create nonce for page/posts
+                echo '<script type="text/javascript">acf.post_id = ' . $post->ID . '; acf.nonce = "' . wp_create_nonce( 'acf_nonce' ) . '";</script>';
+
+                // add user js + css
+                do_action('acf_head-input');
+
+                $this->render_field_groups_for_input();
+
+                break;
+
+
+            //....................................................................
+            case $this->screen->is_taxonomy_add_screen():
+
+                $this->screen->set_acf_layout('div');
+                add_action( $this->screen->get_taxonomy().'_add_form_fields', array($this,'render_field_groups_for_input'));
+                break;
+
+
+            //....................................................................
+            case $this->screen->is_taxonomy_edit_screen():
+
+                $this->screen->set_acf_layout('table');
+                add_action( $this->screen->get_taxonomy().'_edit_form_fields', array($this,'render_field_groups_for_input'));
+                break;
+
+
+            //....................................................................
+            case $this->screen->is_user_add_screen():
+
+                $this->screen->set_acf_layout('table');
+                $this->ajax_render_field_groups_for_input();
+                break;
+
+
+            //....................................................................
+            case $this->screen->is_user_edit_screen():
+
+                $this->screen->set_acf_layout('table');
+                add_action('show_user_profile', array($this,'render_field_groups_for_input'));
+                break;
+
+            default:
+
         }
-
-
-        $this->render_field_groups_for_input( $post, $post_type  );
-
 
 	}
     /*--------------------------------------------------------------------------------------
@@ -137,53 +216,33 @@ class acf_input
     *  @since
     *  @author: Wayne D Harris adapted from Elliot Condon
     *-------------------------------------------------------------------------------------*/
-    function render_field_groups_for_input( $post, $post_type  )
+    function render_field_groups_for_input()
     {
-//        phplog('input.php',' $post = ',$post );
+        global $post;
 
         $post_id = ($post) ? $post->ID : 0;
 
-        // get style for page
-        $show_field_group_ids = $this->acf->get_show_field_group_ids( array( 'post_id' => $post_id, 'post_type' => $post_type ), false);
+        $post_type = $this->screen->get_screen_type();  //todo check this should it be type or subtype or post_type...??
 
-        // wdh : removed 'show on screen' styling : logic is inconsistent with page type
-//        $style = isset($show_field_group_ids[0]) ? $this->show_on_screen($show_field_group_ids[0]) : '';
-//        echo '<style type="text/css" id="acf_style" >' .$style . '</style>';
-
-        // Style
-        echo '<style type="text/css">.acf_postbox, .postbox[id*="acf_"] { display: none; }</style>';
+        $show_field_group_ids = $this->acf->get_screen_field_group_ids( array( 'post_id' => $post_id, 'post_type' => $post_type ), false);
 
 
-        // Create nonce for page/posts
-//        if ($this->acf->session[SCREEN][BASE]==POST || )
-//        {
-            echo '<script type="text/javascript">acf.post_id = ' . $post_id . '; acf.nonce = "' . wp_create_nonce( 'acf_nonce' ) . '";</script>';
-//        }
-
-
-        // add user js + css
-        do_action('acf_head-input');
-
-
-        // wdh : ?? is there any reason we need to display hidden metaboxes here ??
-        // wdh : simplified down to just displaying relevant metaboxes for this page/post
-
-        foreach($show_field_group_ids as $field_group_id)
+        foreach( $show_field_group_ids as $field_group_post_id)
         {
-            $field_group = $this->acf->get_acf_field_group($field_group_id);
+            $field_group = $this->acf->get_acf_field_group($field_group_post_id);
 
-
-
-            // $field_group_values_key for native acf is set as $field_group['name'].
-            // * but note there is scope to dynamically add_field_group_meta_boxes with unique $field_group_values_key
-            $this->add_field_group_meta_box( $field_group, $field_group['name'], $post_type );
-
-
-
-
-
+            if( $this->screen->is_base_post_screen() )
+            {
+                // create metabox
+                // $field_group_values_key for native acf is set as $field_group['name'].
+                // * but note there is scope to dynamically add_field_group_meta_boxes with unique $field_group_values_key
+                $this->add_field_group_meta_box( $field_group_post_id, null ); // todo !!!!
+            }
+            else
+            {
+                $this->render_field_group_input( $field_group, $field_group['name'], $post_id );
+            }
         }
-
     }
     /*--------------------------------------------------------------------------------------
     *  add_field_group_meta_box
@@ -192,20 +251,24 @@ class acf_input
     *  @since
     *  @author: Wayne D Harris adapted from Elliot Condon
     *-------------------------------------------------------------------------------------*/
-    function add_field_group_meta_box( $field_group, $field_group_values_key=null, $screen=null, $show=true )
+    function add_field_group_meta_box( $field_group_post_key, $field_group_values_key=null, $screen=null, $show=true )
     {
-        global $post, $typenow;
+        global $post;
 
-        // wdh : if no unique id for the field_group_values is set use the field_group_name which works for acf natively
+        $field_group_post_id = (is_numeric($field_group_post_key)) ? $field_group_post_key : $this->acf->get_post_id_via_post_name($field_group_post_key);
+
+        $field_group = $this->acf->get_acf_field_group($field_group_post_id);
+
+        // if no unique id for the field_group_values is set use the field_group_name which works for acf natively
         if (!isset($field_group_values_key))
         {
-            $field_group['name'];
+            $field_group_values_key = $field_group['name'];
         }
 
-        if ( !isset($screen) )
-        {
-            $screen = $typenow;
-        }
+//        if ( !isset($screen) )
+//        {
+//            $screen = $this->screen->get_screen_type();  // todo check this
+//        }
 
         $priority = ($field_group['options']['position']=='side') ? 'core' : 'high';
 
@@ -214,140 +277,181 @@ class acf_input
             // wdh : ** note: metabox id must start with 'acf_' for input-actions.js
             'acf_'.$field_group['name'],       //metabox id : wdh : replaced 'acf_'.$field_group['id'],
             __( $field_group['title'], 'acf' ), //metabox title : wdh : added localisation
-            array($this, 'render_field_group_input_form'),
+            array($this, 'add_field_group_meta_box_callback'),
             $screen,
             $field_group['options']['position'],
             $priority,
             array(
-                'field_group_post_id'   => $field_group['id'],      // wdh: added
-                'field_group_post_name' => $field_group['name'],    // wdh: added
-                'fields'                => $field_group['fields'],
-                'options'               => $field_group['options'],
+                'field_group'   => $field_group,      // wdh: added
+//                'field_group_post_name' => $field_group['name'],    // wdh: added
+//                'fields'                => $field_group['fields'],
+//                'options'               => $field_group['options'],
                 'field_group_values_key'=> $field_group_values_key, // wdh: added
                 'show'                  => $show,
-                'post_id'               => $post->ID,
+//                'post_id'               => $post->ID,  // todo check this
             )
 	    );
     }
     /*--------------------------------------------------------------------------------------
-    *  render_field_group_input_form
+    *  add_field_group_meta_box
     *
     *  @description:
     *  @since 1.0.0
     *  @created: 23/06/12
     *-------------------------------------------------------------------------------------*/
 
-    function render_field_group_input_form($post, $metabox)
+    function add_field_group_meta_box_callback( $post, $metabox )
     {
-        // vars
-        $options = array(
-            'fields' => array(),
-            'options' => array(
-                'layout'	=>	'default'
-            ),
-            'show' => 0,
-            'post_id' => 0,
-        );
-        $options = array_merge( $options, $metabox['args'] );
+        $field_group_values_key = $metabox['args']['field_group_values_key'];
+        $field_group            = $metabox['args']['field_group'];
 
-        // needs fields
-        if( $options['fields'] )
-        {
-            echo '<input type="hidden" name="save_input" value="true" />';
-
-            // ***********************************
-            // wdh : additional hidden data sent in $_POST via name/value pairs
-            // allow data from this metabox to be posted to a different post than its acf
-
-            $field_group_values_key = $options['field_group_values_key'];
-
-            echo '<input type="hidden" name="field_group_values_target_post_id['.$field_group_values_key.']" value="'.$options['post_id'].'"/>';
-
-            // save the field_group_post_name/id the metabox is using
-            echo '<input type="hidden" name="field_group_post_id['.$field_group_values_key.']" value="'.$options['field_group_post_id'].'"/>';
-            echo '<input type="hidden" name="field_group_post_name['.$field_group_values_key.']" value="'.$options['field_group_post_name'].'"/>';
-
-            // ***********************************
-
-
-
-            $this->acf->render_fields_for_input( $options['fields'], $options['post_id'], $field_group_values_key, $options['field_group_post_id'] );
-
-        }
+        $this->render_field_group_input( $field_group, $field_group_values_key, $post->ID );
     }
 
     /*--------------------------------------------------------------------------------------
-     *  render_fields_for_input
-     *
-     *  @description:
-     *  @since 3.1.6
-     *  @author Elliot Condon / Wayne D Harris
-     *-------------------------------------------------------------------------------------*/
-    function render_fields_for_input( $fields, $post_id, $field_group_values_key, $field_group_post_id )
-    {
+    *  render_field_group_input
+    *
+    *  @description:
+    *  @since 1.0.0
+    *  @created: 23/06/12
+    *-------------------------------------------------------------------------------------*/
 
-        //filter field values
-        $field_group_values = $this->get_field_group_values( $post_id, $field_group_values_key, $field_group_post_id );
+    function render_field_group_input( $field_group, $field_group_values_key=null, $primary_key_id=null )
+    {
+//        $field_group = $this->acf->get_acf_field_group($field_group_post_id);
+
+
+        $page_type      = $this->screen->get_screen_type();
+        $layout         = $this->screen->get_acf_layout();
+        $metabox_layout = $field_group['options']['layout'];
+        $show           = true;//$field_group['options']['show'];
+
+        $title = (is_numeric( $field_group['id'])) ? get_the_title( $field_group['id'] ) : apply_filters( 'the_title', $field_group['title'] );
+
+        if(!isset($field_group_values_key)) { $field_group_values_key = $field_group['name']; }
+
+        $field_group_post_name  = $field_group['name'];
+        $field_group_post_id    = $field_group['id'];
+//        $primary_key_id         = $options['primary_key_id'];
+
+
+        echo '<input type="hidden" name="save_input" value="true" />';
+
+        echo '<input type="hidden" name="field_group_values_target_post_id['.$field_group_values_key.']" value="'.$primary_key_id.'"/>';
+
+        // save the field_group_post_name/id the metabox is using
+        echo '<input type="hidden" name="field_group_post_id['.$field_group_values_key.']" value="'.$field_group_post_id.'"/>';
+        echo '<input type="hidden" name="field_group_post_name['.$field_group_values_key.']" value="'.$field_group_post_name.'"/>';
+
+
+        //  acf->render_fields_for_input() >>>>>>>>>>>>>>>>>
+
+        $field_group_values = $this->acf->get_field_group_values( $primary_key_id, $field_group_values_key, $field_group['id'], $page_type );
 
         // filter, set defaults and clean
-        $field_config_value_pair = $this->map_field_config_to_value( $fields, $field_group_values['field_values'], ACF_LOAD_VALUE_, ACF_LOAD_FIELD_ );
+        $field_config_value_pair = $this->acf->map_field_config_to_value( $field_group['fields'], $field_group_values['field_values'], ACF_LOAD_VALUE_, ACF_LOAD_FIELD_ );
 
         //set caches of load value filtered results - we'll read from these now until an update
         $field_group_values['field_values'] = $field_config_value_pair['value'];
-        $this->set_cache( 'acf_field_group_values_'.$field_group_values_key, $field_group_values );
+        $this->acf->set_cache( 'acf_field_group_values_'.$field_group_values_key, $field_group_values );
 
-        // * at this point we have set data as required only on read to be used for processing/display now but not in db until save post/update
 
-        // create fields
-        if($fields)
+        // title
+//        if( $options['page_action'] == "edit" && !in_array($page_type, array('media', 'shopp_category')) )
+        if ($layout=='table')
         {
-            foreach($fields as $field)
+            echo '<h3>' .$title . '</h3>';
+            echo '<table class="form-table">';
+        }
+        elseif( $layout=='metabox' )
+        {
+//            echo '<div class="postbox acf_postbox" id="acf_'. $field_group['id'] .'">';
+//            echo '<div title="Click to toggle" class="handlediv"><br></div><h3 class="hndle"><span>' . $title . '</span></h3>';
+//            echo '<div class="inside">';
+        }
+
+
+        // render
+        foreach($field_group['fields'] as $field)
+        {
+            // no type - skip this field
+            if(!$field['type'] || $field['type'] == 'null') { continue; }
+
+            $required_class = ($field['required']) ? ' required' : '';
+            $required_label = ($field['required']) ? ' <span class="required">*</span>' : '';
+
+            // wdh : set fields and $vars to make more readable in rendering code
+            // wdh : create $field['slug'] because $field['name'] gets rewritten later
+            $field['slug']      = $field['name'];
+            $field_slug         = $field['slug'];
+
+            $uid                = $field_group_values_key.'-'.$field_slug;
+
+            $field_wrapper_id   = 'acf-'.$uid;
+
+            $field['id']        = 'acf-field-'.$uid;
+            $field_id           = $field['id'];
+
+            $field_type         = $field['type'];
+            $field_key          = $field['key'];
+            $field_label        = $field['label'];
+            $field_instructions = $field['instructions'];
+
+            // name is key
+            // group separate fields into field groups
+            // the $field['name'] is rewritten for $_POST field 'name' multidimensional array
+            $field['name']      = 'fields['.$field_group_values_key.']['.$field_slug.']';
+
+            // get value from values_array
+            $field['value'] = $this->acf->get_field_value( $field_group_values_key, array( $field_slug ), $primary_key_id, false, $field_group_post_id );
+
+
+            if( $layout == 'metabox' )
             {
-                // no type - skip this field
-                if(!$field['type'] || $field['type'] == 'null') { continue; }
+                echo '<div class="options" data-layout="'.$metabox_layout.'" data-show="'.$show.'" style="display:none"></div>';
+//                echo '<div class="options" data-layout="'.$metabox_layout.'" data-show="'.$show.'" ></div>';
 
-                $required_class = ($field['required']) ? ' required' : '';
-                $required_label = ($field['required']) ? ' <span class="required">*</span>' : '';
-
-                // wdh : set fields and make more readable in rendering code
-                // wdh : create $field['slug'] because $field['name'] gets rewritten later
-                $field['slug']      = $field['name'];
-                $field_slug         = $field['slug'];
-
-                $uid                = $field_group_values_key.'-'.$field_slug;
-
-                $field_wrapper_id   = 'acf-'.$uid;
-
-                $field['id']        = 'acf-field-'.$uid;
-                $field_id           = $field['id'];
-
-                $field_type         = $field['type'];
-                $field_key          = $field['key'];
-                $field_label        = $field['label'];
-                $field_instructions = $field['instructions'];
-
-                // name is key
-                // group separate fields into field groups
-                // the $field['name'] is rewritten for $_POST field 'name' multidimensional array
-                $field['name']      = 'fields['.$field_group_values_key.']['.$field_slug.']';
-
-                // get value from values_array
-                $field['value'] = $this->get_field_value( $field_group_values_key, array( $field_slug ), $post_id, false, $field_group_post_id );
-
-
-
-                echo '<div class="options" data-layout="' . $options['options']['layout'] . '" data-show="' . $options['show'] . '" style="display:none"></div>';
                 echo '<div id='.$field_wrapper_id.'" class="field field-'.$field_type.' field-'.$field_slug. $required_class. '"data-field_name="'.$field_slug.'" data-field_key="'.$field_key.'">';
                 echo '<p class="label">';
                 echo '<label for='.$field_id.'>'.$field_label.$required_label.'</label>';
                 echo $field_instructions;
                 echo '</p>';
-                $this->create_field($field);
+                $this->acf->create_field($field);
                 echo '</div>';
-
+            }
+            elseif( $layout == 'div' )
+            {
+                echo '<div id='.$field_wrapper_id.'" class="form-field field-'.$field_type.' field-'.$field_slug. $required_class.'">';
+                echo '<label for='.$field_id.'>'.$field_label.$required_label.'</label>';
+                $this->acf->create_field($field);
+                if($field_instructions) { echo '<p class="description">'.$field_instructions.'</p>'; }
+                echo '</div>';
+            }
+            else // table row for users /
+            {
+                echo '<div id='.$field_wrapper_id.'" class="form-field field-'.$field_type.' field-'.$field_slug. $required_class.'">';
+                echo '<th valign="top" scope="row"><label for='.$field_id.'>'.$field_label.$required_label.'</label></th>';
+                echo '<td>';
+                $this->acf->create_field($field);
+                if($field_instructions) { echo '<p class="description">'.$field_instructions.'</p>'; }
+                echo '</td>';
+                echo '</tr>';
             }
         }
+
+        // close tags
+//      if( $options['page_action'] == "edit" && $page_type != "media")
+        if ($layout=='table')
+        {
+            echo '</table>';
+        }
+//      elseif( $page_type == 'shopp_category' )
+        elseif ($layout=='div')
+        {
+            echo '</div></div>';
+        }
     }
+
     /*--------------------------------------------------------------------------------------
     *  show_on_screen
     *
@@ -356,7 +460,7 @@ class acf_input
     *  @rewrite: 05/01/13 by wdh
     *  @author: Wayne D Harris / Elliot Condon
     *-------------------------------------------------------------------------------------*/
-    function show_on_screen( $field_group_id = false )
+    function show_on_screen( $field_group_post_id = false )
 	{
         // vars
         $field_groups = $this->acf->get_field_groups();
@@ -367,7 +471,7 @@ class acf_input
 		{
 			foreach($field_groups as $field_group)
 			{
-                if($field_group['id'] != $field_group_id) { continue; }
+                if($field_group['id'] != $field_group_post_id) { continue; }
 
                 $options_hide_array = $field_group['options']['hide_on_screen'];
 
@@ -430,10 +534,6 @@ class acf_input
 		
 		die;
 	}
-
-
-
-
 
     /*--------------------------------------------------------------------------------------
     *  ajax_acf_input
@@ -887,7 +987,7 @@ html.wp-toolbar {
     *  @created: 23/06/12
     */
 
-//    function get_input_style($field_group_id = false)
+//    function get_input_style($field_group_post_id = false)
 //    {
 //        // vars
 //        $field_groups = $this->parent->get_field_groups();
@@ -898,7 +998,7 @@ html.wp-toolbar {
 //        {
 //            foreach($field_groups as $field_group)
 //            {
-//                if($field_group['id'] != $field_group_id) continue;
+//                if($field_group['id'] != $field_group_post_id) continue;
 //
 //
 //                // add style to html
@@ -964,6 +1064,130 @@ html.wp-toolbar {
 //        //if($field_groups)
 //
 //        return $html;
+//    }
+
+
+    /*--------------------------------------------------------------------------------------
+    *  render_field_group_input
+    *
+    *  @description:
+    *  @since 1.0.0
+    *  @created: 23/06/12
+    *-------------------------------------------------------------------------------------*/
+
+//    function render_field_group_input( $field_group_values_key, $field_group_post_id, $primary_key_id )
+//    {
+//        // vars
+//        $options = array(
+//            'fields'    => array(),
+//            'options'   => array( 'layout' =>	'default' ),
+//            'show'      => 0,
+//            'post_id'   => 0,
+//        );
+//        $options = array_merge( $options, $metabox['args'] );
+//
+//
+//        // needs fields
+//        if(!$field_group['fields']) { continue; }
+//
+//
+//        // needs fields
+//        if( $options['fields'] )
+//        {
+//            echo '<input type="hidden" name="save_input" value="true" />';
+//
+//            // ***********************************
+//            // wdh : additional hidden data sent in $_POST via name/value pairs
+//            // allow data from this metabox to be posted to a different post than its acf
+//
+//            $field_group_values_key = $options['field_group_values_key'];
+//
+//            echo '<input type="hidden" name="field_group_values_target_post_id['.$field_group_values_key.']" value="'.$options['post_id'].'"/>';
+//
+//            // save the field_group_post_name/id the metabox is using
+//            echo '<input type="hidden" name="field_group_post_id['.$field_group_values_key.']" value="'.$options['field_group_post_id'].'"/>';
+//            echo '<input type="hidden" name="field_group_post_name['.$field_group_values_key.']" value="'.$options['field_group_post_name'].'"/>';
+//
+//            // ***********************************
+//
+//
+//
+//            $this->acf->render_fields_for_input( $options['fields'], $options['post_id'], $field_group_values_key, $options['field_group_post_id'] );
+//
+//        }
+//    }
+//
+//    /*--------------------------------------------------------------------------------------
+//     *  render_fields_for_input
+//     *
+//     *  @description:
+//     *  @since 3.1.6
+//     *  @author Elliot Condon / Wayne D Harris
+//     *-------------------------------------------------------------------------------------*/
+//    function render_fields_for_input( $fields, $post_id, $field_group_values_key, $field_group_post_id )
+//    {
+//
+//        //filter field values
+//        $field_group_values = $this->get_field_group_values( $post_id, $field_group_values_key, $field_group_post_id );
+//
+//        // filter, set defaults and clean
+//        $field_config_value_pair = $this->map_field_config_to_value( $fields, $field_group_values['field_values'], ACF_LOAD_VALUE_, ACF_LOAD_FIELD_ );
+//
+//        //set caches of load value filtered results - we'll read from these now until an update
+//        $field_group_values['field_values'] = $field_config_value_pair['value'];
+//        $this->set_cache( 'acf_field_group_values_'.$field_group_values_key, $field_group_values );
+//
+//        // * at this point we have set data as required only on read to be used for processing/display now but not in db until save post/update
+//
+//        // create fields
+//        if($fields)
+//        {
+//            foreach($fields as $field)
+//            {
+//                // no type - skip this field
+//                if(!$field['type'] || $field['type'] == 'null') { continue; }
+//
+//                $required_class = ($field['required']) ? ' required' : '';
+//                $required_label = ($field['required']) ? ' <span class="required">*</span>' : '';
+//
+//                // wdh : set fields and make more readable in rendering code
+//                // wdh : create $field['slug'] because $field['name'] gets rewritten later
+//                $field['slug']      = $field['name'];
+//                $field_slug         = $field['slug'];
+//
+//                $uid                = $field_group_values_key.'-'.$field_slug;
+//
+//                $field_wrapper_id   = 'acf-'.$uid;
+//
+//                $field['id']        = 'acf-field-'.$uid;
+//                $field_id           = $field['id'];
+//
+//                $field_type         = $field['type'];
+//                $field_key          = $field['key'];
+//                $field_label        = $field['label'];
+//                $field_instructions = $field['instructions'];
+//
+//                // name is key
+//                // group separate fields into field groups
+//                // the $field['name'] is rewritten for $_POST field 'name' multidimensional array
+//                $field['name']      = 'fields['.$field_group_values_key.']['.$field_slug.']';
+//
+//                // get value from values_array
+//                $field['value'] = $this->get_field_value( $field_group_values_key, array( $field_slug ), $post_id, false, $field_group_post_id );
+//
+//
+//
+//                echo '<div class="options" data-layout="' . $options['options']['layout'] . '" data-show="' . $options['show'] . '" style="display:none"></div>';
+//                echo '<div id='.$field_wrapper_id.'" class="field field-'.$field_type.' field-'.$field_slug. $required_class. '"data-field_name="'.$field_slug.'" data-field_key="'.$field_key.'">';
+//                echo '<p class="label">';
+//                echo '<label for='.$field_id.'>'.$field_label.$required_label.'</label>';
+//                echo $field_instructions;
+//                echo '</p>';
+//                $this->create_field($field);
+//                echo '</div>';
+//
+//            }
+//        }
 //    }
 
 	

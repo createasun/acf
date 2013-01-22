@@ -270,7 +270,7 @@ class acf_everything_fields
             'page_type'         => '',
             'page_action'       => '',
             'option_name'       => '',
-            'primary_key_id'      => 0,
+            'primary_key_id'      => 0,  // can be post id or user id
         );
 
 
@@ -292,6 +292,8 @@ class acf_everything_fields
         {
             $layout = 'metabox';
         }
+
+
 
 
         foreach( $options['field_group_ids'] as $field_group_post_id)
@@ -319,18 +321,7 @@ class acf_everything_fields
             }
 
 
-            // title
-            if( $options['page_action'] == "edit" && !in_array($options['page_type'], array('media', 'shopp_category')) )
-            {
-                echo '<h3>' .$title . '</h3>';
-                echo '<table class="form-table">';
-            }
-            elseif( $layout == 'metabox' )
-            {
-                echo '<div class="postbox acf_postbox" id="acf_'. $field_group['id'] .'">';
-                echo '<div title="Click to toggle" class="handlediv"><br></div><h3 class="hndle"><span>' . $title . '</span></h3>';
-                echo '<div class="inside">';
-            }
+
 
             $field_group_values_key = $field_group['name'];
             $field_group_post_name  = $field_group['name'];
@@ -361,6 +352,22 @@ class acf_everything_fields
             //set caches of load value filtered results - we'll read from these now until an update
             $field_group_values['field_values'] = $field_config_value_pair['value'];
             $this->acf->set_cache( 'acf_field_group_values_'.$field_group_values_key, $field_group_values );
+
+
+
+
+            // title
+            if( $options['page_action'] == "edit" && !in_array($options['page_type'], array('media', 'shopp_category')) )
+            {
+                echo '<h3>' .$title . '</h3>';
+                echo '<table class="form-table">';
+            }
+            elseif( $layout == 'metabox' )
+            {
+                echo '<div class="postbox acf_postbox" id="acf_'. $field_group['id'] .'">';
+                echo '<div title="Click to toggle" class="handlediv"><br></div><h3 class="hndle"><span>' . $title . '</span></h3>';
+                echo '<div class="inside">';
+            }
 
 
             // render
