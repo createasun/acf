@@ -58,12 +58,12 @@ if( empty($location['rules']) )
 									'post'			=>	__("Post",'acf'),
 									'post_category'	=>	__("Category",'acf'),
 									'post_format'	=>	__("Format",'acf'),
-									'taxonomy'		=>	__("Taxonomy",'acf'),
+									'post_taxonomy'	=>	__("Taxonomy",'acf'),
 								),
 								__("Other",'acf') => array(
-									'ef_taxonomy'	=>	__("Taxonomy (Add / Edit)",'acf'),
-									'ef_user'		=>	__("User (Add / Edit)",'acf'),
-									'ef_media'		=>	__("Media (Edit)",'acf')
+									'taxonomy'	    =>	__("Taxonomy (Add / Edit)",'acf'),
+									'user'		    =>	__("User (Add / Edit)",'acf'),
+									'media'		    =>	__("Media (Edit)",'acf')
 								)
 							);
 							

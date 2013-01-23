@@ -294,8 +294,6 @@
 }
 
 
-
-
 /*---------------------------------------------------------------------------------------------
 *
 *  Field: File
@@ -1166,7 +1164,6 @@ td.acf_input-wrap {
 	width: 110px;
 }
 
-
 /*
 *  Edit Image Message
 */
@@ -1191,19 +1188,6 @@ td.acf_input-wrap {
 
 .acf-gallery.view-list .acf-message-wrapper .message {
     margin: 0px !important;
-}
-
-
-/*
-*  3.5 Media Selected images
-*/
-
-.attachment.acf-selected {
-	opacity: 0.3;
-}
-
-.attachment.acf-selected .check {
-	display: block;
 }
 
 
